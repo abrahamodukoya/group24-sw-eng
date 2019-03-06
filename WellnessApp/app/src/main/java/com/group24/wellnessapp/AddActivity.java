@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 public class AddActivity extends AppCompatActivity {
@@ -17,7 +18,8 @@ public class AddActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-        Button goBackBtn = (Button)findViewById(R.id.goBackBtn);
+        // Button to go back to MainActivity screen
+        Button goBackBtn = findViewById(R.id.goBackBtn);
         goBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -26,39 +28,33 @@ public class AddActivity extends AppCompatActivity {
             }
         });
 
-        Spinner staticSpinner = (Spinner) findViewById(R.id.static_spinner);
-
-        // Create an ArrayAdapter using the string array and a default spinner
-        ArrayAdapter<CharSequence> staticAdapter = ArrayAdapter
-                .createFromResource(this, R.array.dropDownChoices,
-                        android.R.layout.simple_spinner_item);
-
+        // Activity category drop down menu
+        Spinner categoryDropDown = findViewById(R.id.categorySelectionSpinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.activityCategoryOptions, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
-        staticAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
-        staticSpinner.setAdapter(staticAdapter);
+        categoryDropDown.setAdapter(adapter);
 
-        Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
-
-        String[] items = new String[] { "Fitness", "Productivity", "Sleep" };
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, items);
-
-        dynamicSpinner.setAdapter(adapter);
-
-        dynamicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        // Log new activity and send data to MainActivity screen
+        Button addActivityBtn = findViewById(R.id.addActivityBtn);
+        addActivityBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                Log.v("item", (String) parent.getItemAtPosition(position));
-            }
+            public void onClick(View v) {
+                // Grab different activity data entries
+                EditText activityLabelText = findViewById(R.id.activityLabelText);
+                EditText activityTimeText = findViewById(R.id.activityTimeText);
+                Spinner activityCategorySpinner = findViewById(R.id.categorySelectionSpinner);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // TODO Auto-generated method stub
+                // Send activity data to MainActivity screen
+                Intent sendActivityData = new Intent(getApplicationContext(), LogActivity.class);
+                sendActivityData.putExtra("ActivityLabel", activityLabelText.getText().toString());
+                sendActivityData.putExtra("ActivityCategory", activityCategorySpinner.getSelectedItem().toString());
+                sendActivityData.putExtra("ActivityTime", activityTimeText.getText().toString());
+
+                startActivity(sendActivityData);
             }
         });
     }

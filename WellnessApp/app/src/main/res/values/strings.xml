@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Wellness App</string>
 
-    <string-array name="dropDownChoices">
+    <string-array name="activityCategoryOptions">
         <item>Fitness</item>
         <item>Productivity</item>
         <item>Sleep</item>

@@ -13,7 +13,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Button logInBtn = (Button)findViewById(R.id.logInBtn);
+        // Log in button to go to MainActivity screen
+        Button logInBtn = findViewById(R.id.logInBtn);
         logInBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
