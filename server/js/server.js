@@ -23,8 +23,7 @@ client.use(body_parser_1.default.json());
 client.use(morgan_1.default('dev'));
 client.use('/', router);
 client.listen(API_PORT, () => console.log(`LISTENING ON PORT ${API_PORT}`));
-//Type in new entry details here and run. Currently hard coded but data successfully reaches 
-//the database.
+//Type in new entry details here and run. Currently hard coded for testing
 const user = new User({
     _id: new mongoose.Types.ObjectId(),
     name: 'Dixie Normus',
