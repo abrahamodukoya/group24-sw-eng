@@ -1,14 +1,26 @@
 {
-  "name": "server",
+  "name": "src",
   "version": "1.0.0",
-  "description": "The NodeJS server of our wellness app",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Group 24",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^3.1.13"
+    "@types/node": "^11.10.4",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "jshint": "^2.10.1",
+    "morgan": "^1.9.1",
+    "require": "^2.4.20",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "tslint": "^5.13.1",
+    "typescript": "^3.3.3333"
   }
 }
