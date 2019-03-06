@@ -7,25 +7,41 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
 
-public class MainActivity extends AppCompatActivity {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+public class LogActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_log);
 
         // Go to AddActivity screen
-        Button goToAddActivityBtn = findViewById(R.id.goToAddActivityBtn);
-        goToAddActivityBtn.setOnClickListener(new View.OnClickListener() {
+        Button addActivityFromLog = findViewById(R.id.addActivityFromLogBtn);
+        addActivityFromLog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent startIntent = new Intent(getApplicationContext(), AddActivity.class);
                 startActivity(startIntent);
             }
         });
+
+        // Go to Analytics screen
+        Button goToAnalytics = findViewById(R.id.goToAnalyticsBtn);
+        goToAnalytics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startIntent = new Intent(getApplicationContext(), AnalyticsActivity.class);
+                startActivity(startIntent);
+            }
+        });
+
+        TextView activityCategoryTextView = findViewById(R.id.activityCategoryTextView);
+        TextView activityLabelTextView = findViewById(R.id.activityLabelTextView);
+        TextView activityTimeTextView = findViewById(R.id.activityTimeTextView);
+        TextView activityDateTextView = findViewById(R.id.activityDateTextView);
 
         // Get logged activity data from AddActivity screen
         String[] activityObject = new String[4];
@@ -40,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             activityObject[3] = dateFormat.format(calendar.getTime());
+
+            activityCategoryTextView.setText(">" + getIntent().getExtras().getString("ActivityCategory"));
+            activityLabelTextView.setText(getIntent().getExtras().getString("ActivityLabel"));
+            activityTimeTextView.setText(getIntent().getExtras().getString("ActivityTime") + " mins");
+            activityDateTextView.setText(dateFormat.format(calendar.getTime()));
 
             /*
             Log.d("LABEL", activityObject[0]);
