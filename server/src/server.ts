@@ -31,20 +31,20 @@ client.use('/', router);
 client.listen(API_PORT, () => console.log(`LISTENING ON PORT ${API_PORT}`));
 
 
-//Type in new entry details here and run. Currently hard coded but data successfully reaches 
-//the database.
+//Type in new entry details here and run. Currently hard coded for testing. 
+//
 
 
-const user = new User({
-   _id: new mongoose.Types.ObjectId(),
-   name: 'Dixie Normus',
-   username: 'fondler',
-  week: {day: [{activity: [{type: String, label: 'Test Activity', day: 'Tuesday', time: '16:00', duration: '4'}]},],week: '12/03/2019',}, });
-   user
-   .save()
-   .then(result => {
-     console.log(result);
-   })
-   .catch(err => {
-     console.log(err);
-   });
+//const user = new User({
+//   _id: new mongoose.Types.ObjectId(),
+//   name: 'Dixie Normus',
+//   username: 'fondler',
+//  week: {day: [{activity: [{type: String, label: 'Test Activity', day: 'Tuesday', time: '16:00', duration: '4'}]},],week: '12/03/2019',}, });
+//   user
+//   .save()
+//   .then(result => {
+//     console.log(result);
+//   })
+ //  .catch(err => {
+//     console.log(err);
+//   });
