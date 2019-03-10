@@ -1,14 +1,15 @@
-/**
- *This is the server-side script. It will respond to requests from the app to store and retrieve data. Data storage and retrieval can be put into seperate scripts if deemed necessary.
- *
- */
 
- 
 const Joi = require('joi');
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
 
 app.use(express.json());
+app.use(morgan('dev'));
+
+
+/*********************************************************************************************************************************************/
+
 
 // initial array of users with some sample details
 const users = [
@@ -16,18 +17,21 @@ const users = [
     { id: 2, rest : 3, social : 6, productive : 1, fitness : 10 }
 ];
 
+
+/*********************************************************************************************************************************************/
+
 //http://localhost:3000/
-app.get('/', (req, res)=> {
-    res.send('Hello! This is a test page.');
+app.get('/', (req, res, next)=> {
+    res.send('Hello! This is a home page.');
 });
 
 //http://localhost:3000/api/users
-app.get('/api/users',(req,res) => {
+app.get('/api/users',(req, res, next) => {
     res.send(users);
 });
 
 //http://localhost:3000/api/users/1
-app.get('/api/users/:id', (req,res) => {
+app.get('/api/users/:id', (req, res, next) => {
     const user = users.find(c => c.id === parseInt(req.params.id));
     // error 404 - not found
     if(!user) res.status(404).send('User not found.');
@@ -36,7 +40,7 @@ app.get('/api/users/:id', (req,res) => {
 
 // post request - adds a new user to the array and the rest,social,productive,fitness attributes to its object
 // doesn't check for duplicate id numbers (yet)
-app.post('/api/users', (req, res) => {
+app.post('/api/users', (req, res, next) => {
     const result = validateUserTimes(req.body);
     if(result.error){
         // error code 400 - bad request
@@ -58,7 +62,7 @@ app.post('/api/users', (req, res) => {
 });
 
 // put request - currently overwrites(updates) old values for rest,social,productive,fitness 
-app.put('/api/users/:id', (req,res)=> {
+app.put('/api/users/:id', (req, res, next)=> {
     const user = users.find(c => c.id === parseInt(req.params.id));
     if(!user) {
         // error 404 - not found
@@ -81,7 +85,7 @@ app.put('/api/users/:id', (req,res)=> {
 });
 
 
-app.delete('/api/users/:id', (req,res) => {
+app.delete('/api/users/:id', (req, res, next) => {
     const user = users.find(c => c.id === parseInt(req.params.id));
     if(!user) {
         // error 404 - not found
@@ -104,15 +108,38 @@ app.listen(port, ()=>{
 });
 
 
+// error handler, if reached - no route before was entered
+app.use((req, res, next)=>{
+    const error = new Error('Route not found');
+    console.log('ERROR : Route not found');
+    error.status = 404;
+    next(error);
+});
+
+// error handler
+app.use((error, req, res, next)=>{
+    // 500 error code for all other types of errors
+    res.status(error.status || 500);
+    res.json({
+        error: {
+            message: error.message
+        }
+    });
+});
+
+
+/*********************************************************************************************************************************************/
+
+
 // function to validate user input
-// currently checks if positive and if less than 24 hours, since it's daily input
-// in the future check if sum of all times < 24 ???
+// currently checks if positive and if not negative and less than 24 hours, since it's daily input
+// is there a way to check is sum < 24??? 
 function validateUserTimes(userTimes){
     const schema = {
-        rest : Joi.number().positive().less(24),
-        social : Joi.number().positive().less(24),
-        productive : Joi.number().positive().less(24),
-        fitness :  Joi.number().positive().less(24)
+        rest : Joi.number().min(0).less(24),
+        social : Joi.number().min(0).less(24),
+        productive : Joi.number().min(0).less(24),
+        fitness :  Joi.number().min(0).less(24)
     };
     return Joi.validate(userTimes, schema);
 }
