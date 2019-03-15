@@ -1,6 +1,8 @@
 package com.group24.wellnessapp;
 
 import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +26,7 @@ public class LogActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent startIntent = new Intent(getApplicationContext(), AddActivity.class);
+                //startIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(startIntent);
             }
         });
@@ -34,6 +37,7 @@ public class LogActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent startIntent = new Intent(getApplicationContext(), AnalyticsActivity.class);
+                //startIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(startIntent);
             }
         });

@@ -18,16 +18,6 @@ public class AddActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-        // Button to go back to MainActivity screen
-        Button goBackBtn = findViewById(R.id.goBackBtn);
-        goBackBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(startIntent);
-            }
-        });
-
         // Activity category drop down menu
         Spinner categoryDropDown = findViewById(R.id.categorySelectionSpinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -53,6 +43,8 @@ public class AddActivity extends AppCompatActivity {
                 sendActivityData.putExtra("ActivityLabel", activityLabelText.getText().toString());
                 sendActivityData.putExtra("ActivityCategory", activityCategorySpinner.getSelectedItem().toString());
                 sendActivityData.putExtra("ActivityTime", activityTimeText.getText().toString());
+
+                sendActivityData.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 startActivity(sendActivityData);
             }
