@@ -8,8 +8,11 @@ const userSchema = mongoose.Schema({
         index: false,
         day: [
             {
+                _id : false,
+                index: false,
                 activity: [
                     {
+                        _id : false,
                         type: String,
                         label: String,
                         dayName: String,

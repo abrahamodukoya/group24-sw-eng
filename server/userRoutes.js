@@ -31,11 +31,11 @@ router.get('/users',(req, res, next) => {
 
 //http://localhost:3000/api/users/1
 router.get('/users/:id', (req, res, next) => {
-    const id = User.id;
+    const id = req.params.id;
     User.findById(id)
     .exec()
     .then(doc =>{
-        console.log('From database', doc);
+        console.log('From database\n', doc);
         if(doc){
             res.status(200).json(doc);
         }else{
@@ -58,14 +58,9 @@ router.post('/users', (req, res, next) => {
     console.log(req.body);
 
     // create new object and assign attributes
-    // const user = new User({
-    //     _id: new mongoose.Types.ObjectId(),
-    //     name : req.body.name,
-    //     username: req.body.username,
-    // });
-
     const user = new User(req.body);
     user._id = new mongoose.Types.ObjectId();
+    user.week.day = {activity:[]};
 
     user
     .save()
@@ -109,9 +104,8 @@ router.patch('/users/:id', (req, res, next)=> {
                     date: req.body.date,
                     duration: req.body.duration
                 };
-                if(data){ 
-                    user.week.day.activity.push(data);
-                }
+
+                User.update({_id : id}, {$push: {activity : data}});
             }
 
             user.save((err, updatedObj)=>{
