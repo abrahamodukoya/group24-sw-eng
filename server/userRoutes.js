@@ -104,8 +104,9 @@ router.patch('/users/:id', (req, res, next)=> {
                     date: req.body.date,
                     duration: req.body.duration
                 };
-
-                User.update({_id : id}, {$push: {activity : data}});
+                //User.update({_id : id}, {$push: {activity : data}});
+                activity_len = user.week.day[0].activity.length
+                user.week.day[0].activity[activity_len] = data
             }
 
             user.save((err, updatedObj)=>{
@@ -143,7 +144,7 @@ router.delete('/users/:id', (req, res, next) => {
 
 // function to validate user input
 // currently checks if positive and if not negative and less than 24 hours, since it's daily input
-// is there a way to check is sum < 24??? 
+// is there a way to check is sum < 24???
 // function validateUserTimes(userTimes){
 //     const schema = {
 //         rest : Joi.number().min(0).less(24),
