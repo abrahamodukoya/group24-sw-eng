@@ -1,7 +1,7 @@
 
 
 POST 
-http://3.92.227.189:3000/api/users
+http://3.92.227.189:80/api/users
 {
 	"name": "Test",
 	"username": "TestUsername"
@@ -10,7 +10,7 @@ http://3.92.227.189:3000/api/users
 
 
 PATCH
-http://3.92.227.189:3000/api/users/5c8d9cf2b4c8230381883a58
+http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
 {
 	"type" : "test",
 	"label" : "sample text",
