@@ -40,10 +40,8 @@ router.get('/users/:id', (req, res, next) => {
     .select('-__v')
     .exec()
     .then(doc =>{
-        console.log('From database\n', doc);
         if(doc){
             res.status(200).json(doc);
-            console.log('this is day length ====> ', doc.data.day.length);
         }else{
             res.status(404).json({
                 message: ' No valid entry for this id.'
@@ -121,10 +119,8 @@ router.patch('/users/:id', (req, res, next)=> {
                 }
                 // else if there are days
                 else if(day_len !== 0){
-                    console.log('day length != 0 ............');
                     var activity_len = user.data.day[day_len-1].activity.length;
-                    console.log('activity_len ======> ', activity_len);
-                                        // update existing day
+                    // update existing day
                     if(date === user.data.day[day_len-1].date){
                         console.log('DATES EQUAL ======> ', date, ' ====> ',user.data.day[day_len-1].date);
                         user.data.day[day_len-1].activity[activity_len] = data;       
@@ -136,8 +132,11 @@ router.patch('/users/:id', (req, res, next)=> {
                         user.data.day[day_len].date = date; 
                         user.data.day[day_len].activity[0] = data;
                     }
-                    else{
-                        console.log('DATES NOT EQUAL ............', date, ' ====> ',user.data.day[day_len-1].date);
+                    // if date is from the past - throw error
+                    else if(date < user.data.day[day_len-1].date){
+                        console.log('DATE LOWER............', date, ' ====> ',user.data.day[day_len-1].date);
+                        res.send('Cannot add activity for a day in the past. Please enter a valid date.');
+                        return;
                     }
                 }
             }
