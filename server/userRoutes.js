@@ -7,19 +7,23 @@ const mongoose = require('mongoose');
 
 const User = require('./userModel');
 
-//http://localhost:3000/
+//http://3.92.227.189:80/
 router.get('/', (req, res, next)=> {
     res.send('Hello! This is a home page.');
 });
 
 
-//http://localhost:3000/api/users
+//http://3.92.227.189:80/api/users
 router.get('/users',(req, res, next) => {
     User.find()
+    .select('-__v')
     .exec()
     .then(docs => {
-        console.log(docs);
-        res.status(200).json(docs);
+        const response = {
+            count: docs.length, 
+            users: docs
+        };
+        res.status(200).json(response);
     })
     .catch(err => {
         console.log(err);
@@ -29,15 +33,17 @@ router.get('/users',(req, res, next) => {
     });
 });
 
-//http://localhost:3000/api/users/1
+//http://3.92.227.189:80/api/users/_id
 router.get('/users/:id', (req, res, next) => {
     const id = req.params.id;
     User.findById(id)
+    .select('-__v')
     .exec()
     .then(doc =>{
         console.log('From database\n', doc);
         if(doc){
             res.status(200).json(doc);
+            console.log('this is day length ====> ', doc.data.day.length);
         }else{
             res.status(404).json({
                 message: ' No valid entry for this id.'
@@ -51,7 +57,7 @@ router.get('/users/:id', (req, res, next) => {
 });
 
 
-
+//http://3.92.227.189:80/api/users
 // post request
 router.post('/users', (req, res, next) => {
 
@@ -60,7 +66,7 @@ router.post('/users', (req, res, next) => {
     // create new object and assign attributes
     const user = new User(req.body);
     user._id = new mongoose.Types.ObjectId();
-    user.week.day = {activity:[]};
+    //user.data.day = {activity:[]};
 
     user
     .save()
@@ -83,40 +89,75 @@ router.post('/users', (req, res, next) => {
 
 
 // patch request
+//http://3.92.227.189:80/api/users/_id
 router.patch('/users/:id', (req, res, next)=> {
     const id = req.params.id;
-    console.log('this is the id number ' + id);
-    // prints whatever is inputted as ':id'
-
     User.findOne({_id : id}, (err,user)=>{
         if(err){
             console.log(err);
             res.status(500).send();
         }else{
+            // user doesn't exist
             if(!user){
                 res.status(404).send();
             }
+            // user found
             else{
-                var data = {
+                // date of day
+                const date = req.body.date;
+                // data to be updated
+                const data = {
                     type: req.body.type,
                     label: req.body.label,
-                    dayName: req.body.dayName,
-                    date: req.body.date,
                     duration: req.body.duration
                 };
-                //User.update({_id : id}, {$push: {activity : data}});
-                activity_len = user.week.day[0].activity.length
-                user.week.day[0].activity[activity_len] = data
+                // if no days 
+                var day_len = user.data.day.length;
+                if(day_len === 0){
+                    user.data.day = {activity:[]};
+                    user.data.day[0].date = date; 
+                    user.data.day[0].activity[0] = data;
+                    console.log('date is ======> ', user.data.day[0].date);
+                }
+                // else if there are days
+                else if(day_len !== 0){
+                    console.log('day length != 0 ............');
+                    var activity_len = user.data.day[day_len-1].activity.length;
+                    console.log('activity_len ======> ', activity_len);
+                                        // update existing day
+                    if(date === user.data.day[day_len-1].date){
+                        console.log('DATES EQUAL ======> ', date, ' ====> ',user.data.day[day_len-1].date);
+                        user.data.day[day_len-1].activity[activity_len] = data;       
+                    }
+                    // new day
+                    else if(date > user.data.day[day_len-1].date){
+                        console.log('DATE BIGGER..........', date, ' ====> ',user.data.day[day_len-1].date);
+                        user.data.day[day_len] = {activity:[]};
+                        user.data.day[day_len].date = date; 
+                        user.data.day[day_len].activity[0] = data;
+                    }
+                    else{
+                        console.log('DATES NOT EQUAL ............', date, ' ====> ',user.data.day[day_len-1].date);
+                    }
+                }
             }
 
-            user.save((err, updatedObj)=>{
-                if(err){
-                    console.log(err);
-                    res.status(500).send();
-                }
-                else{
-                    res.send(updatedObj);
-                }
+            user
+            // .select('-__v')
+            .save()
+            .then(result =>{
+                console.log(result);
+                // return in body of response to client
+                res.status(201).json({
+                    message : 'User updated',
+                    user: result
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                });
             });
         }
     });
@@ -125,6 +166,7 @@ router.patch('/users/:id', (req, res, next)=> {
 
 
 // delete request
+//http://3.92.227.189:80/api/users/_id
 router.delete('/users/:id', (req, res, next) => {
     const id = req.params.id;
     User.remove({_id: id})
