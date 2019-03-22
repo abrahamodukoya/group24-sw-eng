@@ -1,7 +1,7 @@
 
 
 POST 
-http://3.92.227.189:80/api/users
+http://3.92.227.189:80/api/users/signup
 {
 	"username": "Jeff",
 	"password": "jeffsPassword"

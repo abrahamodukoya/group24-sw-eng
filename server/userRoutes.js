@@ -3,7 +3,7 @@ const Joi = require('joi');
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-
+const bcrypt = require('bcrypt');
 
 const User = require('./userModel');
 
@@ -55,32 +55,52 @@ router.get('/users/:id', (req, res, next) => {
 });
 
 
-//http://3.92.227.189:80/api/users
+//http://3.92.227.189:80/api/users/signup
 // post request
-router.post('/users', (req, res, next) => {
-
+router.post('/users/signup', (req, res, next) => {
     console.log(req.body);
-
-    // create new object and assign attributes
-    const user = new User(req.body);
-    user._id = new mongoose.Types.ObjectId();
-    //user.data.day = {activity:[]};
-
-    user
-    .save()
-    .then(result =>{
-        console.log(result);
-        // return in body of response to client
-        res.status(201).json({
-            message : 'New user added',
-            user: result
-        });
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
-        });
+    User.find({username : req.body.username})
+    .exec()
+    .then(foundUser => {
+        // if user of this username already exists
+        if(foundUser){
+            return res.status(409).json({
+                message : 'Username taken'
+            });
+        }
+        // if username isn't taken
+        else{
+             // create new object and assign attributes
+            bcrypt.hash(req.body.password, 10, (err, hash)=>{
+                if(err){
+                    return res.status(500).json({
+                        error : err
+                    });
+                }
+                else{
+                    const user = new User({
+                        _id : new mongoose.Types.ObjectId(),
+                        username : req.body.username,
+                        password : hash
+                    });
+                    user
+                    .save()
+                    .then(result =>{
+                        console.log(result);
+                        // return in body of response to client
+                        res.status(201).json({
+                            userId: result._id
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+                }   
+            });
+        }
     });
 });
 
