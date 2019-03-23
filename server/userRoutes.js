@@ -111,7 +111,7 @@ router.post('/users/signup', (req, res, next) => {
 
 // login request
 router.post('/users/login', (req, res, next) => {
-    User.find({ user : req.body.user})
+    User.find({ user : req.body.user});
 });
 
 
