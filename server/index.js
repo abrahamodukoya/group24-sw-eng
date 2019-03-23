@@ -22,7 +22,7 @@ app.use("/api",userRoutes);
 
 
 // PORT
-// base - listening to port 3000
+// base - listening to port 80
 // can be changed with 'export PORT= xxxx' 
 const port = process.env.PORT || 3000;
 app.listen(port, ()=>{

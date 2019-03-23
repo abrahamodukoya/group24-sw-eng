@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 
 const User = require('./userModel');
 
+
 //http://3.92.227.189:80/
 router.get('/', (req, res, next)=> {
     res.send('Hello! This is a home page.');
@@ -32,6 +33,7 @@ router.get('/users',(req, res, next) => {
         });
     });
 });
+
 
 //http://3.92.227.189:80/api/users/_id
 router.get('/users/:id', (req, res, next) => {
@@ -63,7 +65,8 @@ router.post('/users/signup', (req, res, next) => {
     .exec()
     .then(foundUser => {
         // if user of this username already exists
-        if(foundUser){
+        if(foundUser.length >= 1){
+            // code 409 - conflict
             return res.status(409).json({
                 message : 'Username taken'
             });
@@ -104,6 +107,12 @@ router.post('/users/signup', (req, res, next) => {
     });
 });
 
+
+
+// login request
+router.post('/users/login', (req, res, next) => {
+    User.find({ user : req.body.user})
+});
 
 
 // patch request
@@ -181,7 +190,6 @@ router.patch('/users/:id', (req, res, next)=> {
         }
     });
 });
-
 
 
 // delete request
