@@ -1,9 +1,11 @@
 
+// import dependencies
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 
+// get rid of deprecation warning - from mongoose documentation
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -11,6 +13,7 @@ mongoose.set('useCreateIndex', true);
 app.use(express.json());
 app.use(morgan('dev'));
 
+// mongodb setup
 const path = ('mongodb+srv://group24:j5MATH!-AEQEZmA@group24-c1xu2.mongodb.net/test?retryWrites=true');
 
 mongoose.connect(path,{ useNewUrlParser: true })
@@ -20,7 +23,8 @@ mongoose.connect(path,{ useNewUrlParser: true })
     process.exit(1);
 });
 
-
+// all of the routes from userRoutes will have /api in their route
+// if not - invalid route
 const userRoutes = require('./userRoutes');
 app.use("/api",userRoutes);
 

@@ -1,4 +1,5 @@
 
+// import dependencies
 const Joi = require('joi');
 const express = require('express');
 const router = express.Router();
@@ -9,8 +10,10 @@ const User = require('./userModel');
 const checkAuth = require('./check-auth');
 
 
+
 // NOT PROTECTED
-//http://3.92.227.189:80/api/users
+// returns a list of all of the users
+// http://3.92.227.189:80/api/users
 router.get('/users',(req, res, next) => {
     User.find()
     .select('-__v')
@@ -20,6 +23,7 @@ router.get('/users',(req, res, next) => {
             count: docs.length, 
             users: docs
         };
+        // return list of users
         res.status(200).json(response);
     })
     .catch(err => {
@@ -31,19 +35,23 @@ router.get('/users',(req, res, next) => {
 });
 
 
-// NOT PROTECTED
-//http://3.92.227.189:80/api/users/_id
-router.get('/users/:id', (req, res, next) => {
+
+// PROTECTED
+// returns a user object if one exists, based of id
+// http://3.92.227.189:80/api/users/_id
+router.get('/users/:id', checkAuth, (req, res, next) => {
     const id = req.params.id;
     User.findById(id)
     .select('-__v')
     .exec()
     .then(doc =>{
         if(doc){
+            // if a user of this id exists
             res.status(200).json(doc);
         }else{
+            // if a user of this id is not found
             res.status(404).json({
-                message: ' No valid entry for this id.'
+                message: ' No user found for this id.'
             });
         }
     })
@@ -54,10 +62,11 @@ router.get('/users/:id', (req, res, next) => {
 });
 
 
-//http://3.92.227.189:80/api/users/signup
-// post request
-router.post('/users/signup', (req, res, next) => {
-    console.log(req.body);
+
+// NOT PROTECTED
+// register request, allows non existing users to register
+// http://3.92.227.189:80/api/users/register
+router.post('/users/register', (req, res, next) => {
     User.find({username : req.body.username})
     .exec()
     .then(foundUser => {
@@ -65,12 +74,13 @@ router.post('/users/signup', (req, res, next) => {
         if(foundUser.length >= 1){
             // code 409 - conflict
             return res.status(409).json({
-                message : 'Username taken'
+                message : 'Username taken.'
             });
         }
         // if username isn't taken
         else{
              // create new object and assign attributes
+             // hash password
             bcrypt.hash(req.body.password, 10, (err, hash)=>{
                 if(err){
                     return res.status(500).json({
@@ -78,16 +88,17 @@ router.post('/users/signup', (req, res, next) => {
                     });
                 }
                 else{
+                    // create new user object
                     const user = new User({
                         _id : new mongoose.Types.ObjectId(),
                         username : req.body.username,
                         password : hash
                     });
+                    // save user to the database
                     user
                     .save()
                     .then(result =>{
-                        console.log(result);
-                        // return in body of response to client
+                        // return user_id in response to client
                         res.status(201).json({
                             userId: result._id
                         });
@@ -106,40 +117,52 @@ router.post('/users/signup', (req, res, next) => {
 
 
 
-// login request
+// NOT PROTECTED
+// login request - checks if there exists a user of matching username and password
+// http://3.92.227.189:80/api/users/login
 router.post('/users/login', (req, res, next) => {
     User.find({ username : req.body.username})
     .exec()
     .then(user => {
         if(user.length < 1){
+            // .find returns an array of users (should only ever be max length 1 as each user is unique)
+            // if length < 1 --> no user found
             return res.status(401).json({
-                message : 'Auth failed'
+                message : 'Authentication failed.'
             });
         }
+        // user found, compare hashed passwords
         bcrypt.compare(req.body.password, user[0].password, (err, result) =>{
             if(err){
                 return res.status(401).json({
-                    message : 'Auth failed'
+                    message : 'Authentication failed.'
                 });
             }
+            // if hashed passwords match, create a token and assign it to the user
             if(result){
+                // token object
                 const token = jwt.sign({
                     username : user[0].username,
                     userId : user[0]._id
                 },
                 // secret key for token creation
                 '24Jooan7g@ry%77ness',
-                //Great choice Kamil -> 'Joaan'
                 {
+                // expiration timer
                     expiresIn : '1h'
                 });
+                // return token and user id upon successful login
                 return res.status(201).json({
-                    message : 'Auth successful',
-                    token : token
+                    message : 'Authentication successful.',
+                    token : token,
+                    _id : user[0].id
                 });
             }
+            // error message if something went wrong
+            // all error messages are the same for security reasons so potential attackers can't 
+            // figure out where the login failed
             return res.status(401).json({
-                message : 'Auth failed'
+                message : 'Authentication failed.'
             });
         });
     })
@@ -152,7 +175,9 @@ router.post('/users/login', (req, res, next) => {
 });
 
 
+
 // patch request - PROTECTED
+// updates the activity array of a user on a specific day, based on date from request
 //http://3.92.227.189:80/api/users/_id
 router.patch('/users/:id', checkAuth, (req, res, next)=> {
     const id = req.params.id;
@@ -161,46 +186,58 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
             console.log(err);
             res.status(500).send();
         }else{
-            // user doesn't exist
+            // if user doesn't exist
             if(!user){
                 res.status(404).send();
             }
-            // user found
+            // if user found
             else{
-                // date of day
+                // date of day from request
+                // ( the model is designed such that the array of days for a user will be in chronological order )
                 const date = req.body.date;
-                // data to be updated
+                // data to be updated (the activity to be added)
                 const data = {
                     type: req.body.type,
                     label: req.body.label,
                     duration: req.body.duration
                 };
-                // if no days 
+                // some input validation for duration to be a positive number etc
+                const userInput = validateInput(data);
+                if(userInput.error){
+                    // error code 400 - bad request
+                    res.status(400).json({
+                        error : userInput.error.details[0].message
+                    });
+                    return;
+                }
+                // if the user has no previous inputs, and hence no day objects in db 
                 var day_len = user.data.day.length;
                 if(day_len === 0){
+                    // create activity array for the day object
                     user.data.day = {activity:[]};
+                    // asign date and activity to the day
                     user.data.day[0].date = date; 
                     user.data.day[0].activity[0] = data;
-                    console.log('date is ======> ', user.data.day[0].date);
                 }
-                // else if there are days
+                // else if there are previous inputs, ie existing day objects in db
                 else if(day_len !== 0){
+                    // length of activity array of last day in array
                     var activity_len = user.data.day[day_len-1].activity.length;
-                    // update existing day
+                    // if date from request matches that of the last day in the array
+                    // update the activity array of that day
                     if(date === user.data.day[day_len-1].date){
-                        console.log('DATES EQUAL ======> ', date, ' ====> ',user.data.day[day_len-1].date);
                         user.data.day[day_len-1].activity[activity_len] = data;       
                     }
-                    // new day
+                    // else if date is more recent than last day in the array
+                    // create a new day object and assign corresponding values
                     else if(date > user.data.day[day_len-1].date){
-                        console.log('DATE BIGGER..........', date, ' ====> ',user.data.day[day_len-1].date);
                         user.data.day[day_len] = {activity:[]};
                         user.data.day[day_len].date = date; 
                         user.data.day[day_len].activity[0] = data;
                     }
                     // if date is from the past - throw error
+                    // AS SUCH THE ARRAY WILL BE IN CHRONOLOGICAL ORDER
                     else if(date < user.data.day[day_len-1].date){
-                        console.log('DATE LOWER............', date, ' ====> ',user.data.day[day_len-1].date);
                         res.send('Cannot add activity for a day in the past. Please enter a valid date.');
                         return;
                     }
@@ -208,13 +245,11 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
             }
 
             user
-            // .select('-__v')
             .save()
             .then(result =>{
-                console.log(result);
-                // return in body of response to client
+                // return updated user in body of response to client
                 res.status(201).json({
-                    message : 'User updated',
+                    message : 'User updated.',
                     user: result
                 });
             })
@@ -228,51 +263,6 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
     });
 });
 
-// simple sign in/ verify user - checks for user with matching, username, password and ID and returns
-// the id. (no encryption, secure route etc.)
-router.get('/simpleSign/:id/:username/:password', function(req, res,next){
-    const userId = req.params.id;
-    const userName = req.params.username;
-    const passWord = req.params.password;
-  
-    console.log(userId);
-    console.log(userName);
-    console.log(passWord);
-  
-  User.find({_id: userId, password: passWord, username: userName }, '_id', function(err, user)
-  {
-      if (err)
-      {
-        res.status(404).json({
-                message: ' No valid entry for this id.'
-            });
-      }
-    res.json(user);
-    console.log(user)
-
- });
-});
-
-// get days
-router.get('/activity/:id/', function(req, res){
-    const userId = req.params.id;
-    console.log(userId)
-  
-  User.find({_id: userId}, 'data', function(err, user)
-   {
-      if (err)
-      {
-          res.send(err);
-      }
-      res.json(user);
-      console.log(user)
-  
-   });
-  });
-
-
-// Get for dates etc not done yet but almost finished so pls dont do it! Will be done sometime today (Sunday).
-
 
 // delete request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
@@ -281,7 +271,9 @@ router.delete('/users/:id', checkAuth, (req, res, next) => {
     User.remove({_id: id})
     .exec()
     .then(result => {
-        res.status(200).json(result);
+        res.status(200).json({
+            message : 'User deleted.'
+        });
     })
     .catch(err => {
         console.log(err);
@@ -293,20 +285,16 @@ router.delete('/users/:id', checkAuth, (req, res, next) => {
 
 
 
-
-
 // function to validate user input
-// currently checks if positive and if not negative and less than 24 hours, since it's daily input
-// is there a way to check is sum < 24???
-// function validateUserTimes(userTimes){
-//     const schema = {
-//         rest : Joi.number().min(0).less(24),
-//         social : Joi.number().min(0).less(24),
-//         productive : Joi.number().min(0).less(24),
-//         fitness :  Joi.number().min(0).less(24)
-//     };
-//     return Joi.validate(userTimes, schema);
-// }
+// checks whether duration is a positive number less than 24, and if the required fields are there
+function validateInput(data){
+    const schema = {
+        type : Joi.string().required(),
+        label : Joi.string(),
+        duration : Joi.number().min(1).less(24).required()
+    };
+    return Joi.validate(data, schema);
+}
 
 
 module.exports = router;

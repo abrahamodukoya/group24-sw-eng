@@ -1,3 +1,9 @@
+
+// user model for the database, a user will have a data array
+// data arary consists of an array of day objects
+// day object consits of corresponding date, and an array of activities for that day
+// activity object has type, label and duration properties
+
 const mongoose = require('mongoose');
 const activitySchema = mongoose.Schema({
     _id : false,
