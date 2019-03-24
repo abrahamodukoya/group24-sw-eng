@@ -129,6 +129,7 @@ router.post('/users/login', (req, res, next) => {
                 },
                 // secret key for token creation
                 '24Jooan7g@ry%77ness',
+                //Great choice Kamil -> 'Joaan'
                 {
                     expiresIn : '1h'
                 });
@@ -227,6 +228,51 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
     });
 });
 
+// simple sign in/ verify user - checks for user with matching, username, password and ID and returns
+// the id. (no encryption, secure route etc.)
+router.get('/simpleSign/:id/:username/:password', function(req, res,next){
+    const userId = req.params.id;
+    const userName = req.params.username;
+    const passWord = req.params.password;
+  
+    console.log(userId);
+    console.log(userName);
+    console.log(passWord);
+  
+  User.find({_id: userId, password: passWord, username: userName }, '_id', function(err, user)
+  {
+      if (err)
+      {
+        res.status(404).json({
+                message: ' No valid entry for this id.'
+            });
+      }
+    res.json(user);
+    console.log(user)
+
+ });
+});
+
+// get days
+router.get('/activity/:id/', function(req, res){
+    const userId = req.params.id;
+    console.log(userId)
+  
+  User.find({_id: userId}, 'data', function(err, user)
+   {
+      if (err)
+      {
+          res.send(err);
+      }
+      res.json(user);
+      console.log(user)
+  
+   });
+  });
+
+
+// Get for dates etc not done yet but almost finished so pls dont do it! Will be done sometime today (Sunday).
+
 
 // delete request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
@@ -244,6 +290,8 @@ router.delete('/users/:id', checkAuth, (req, res, next) => {
         });
     });
 });
+
+
 
 
 
