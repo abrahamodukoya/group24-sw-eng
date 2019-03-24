@@ -4,16 +4,12 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-
+const jwt = require('jsonwebtoken');
 const User = require('./userModel');
+const checkAuth = require('./check-auth');
 
 
-//http://3.92.227.189:80/
-router.get('/', (req, res, next)=> {
-    res.send('Hello! This is a home page.');
-});
-
-
+// NOT PROTECTED
 //http://3.92.227.189:80/api/users
 router.get('/users',(req, res, next) => {
     User.find()
@@ -35,6 +31,7 @@ router.get('/users',(req, res, next) => {
 });
 
 
+// NOT PROTECTED
 //http://3.92.227.189:80/api/users/_id
 router.get('/users/:id', (req, res, next) => {
     const id = req.params.id;
@@ -111,13 +108,52 @@ router.post('/users/signup', (req, res, next) => {
 
 // login request
 router.post('/users/login', (req, res, next) => {
-    User.find({ user : req.body.user});
+    User.find({ username : req.body.username})
+    .exec()
+    .then(user => {
+        if(user.length < 1){
+            return res.status(401).json({
+                message : 'Auth failed'
+            });
+        }
+        bcrypt.compare(req.body.password, user[0].password, (err, result) =>{
+            if(err){
+                return res.status(401).json({
+                    message : 'Auth failed'
+                });
+            }
+            if(result){
+                const token = jwt.sign({
+                    username : user[0].username,
+                    userId : user[0]._id
+                },
+                // secret key for token creation
+                '24Jooan7g@ry%77ness',
+                {
+                    expiresIn : '1h'
+                });
+                return res.status(201).json({
+                    message : 'Auth successful',
+                    token : token
+                });
+            }
+            return res.status(401).json({
+                message : 'Auth failed'
+            });
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
+    });
 });
 
 
-// patch request
+// patch request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
-router.patch('/users/:id', (req, res, next)=> {
+router.patch('/users/:id', checkAuth, (req, res, next)=> {
     const id = req.params.id;
     User.findOne({_id : id}, (err,user)=>{
         if(err){
@@ -192,9 +228,9 @@ router.patch('/users/:id', (req, res, next)=> {
 });
 
 
-// delete request
+// delete request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
-router.delete('/users/:id', (req, res, next) => {
+router.delete('/users/:id', checkAuth, (req, res, next) => {
     const id = req.params.id;
     User.remove({_id: id})
     .exec()
