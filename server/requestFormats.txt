@@ -1,6 +1,6 @@
 
 
-POST 
+POST - REGISTER
 http://3.92.227.189:80/api/users/signup
 {
 	"username": "Jeff",
@@ -8,10 +8,18 @@ http://3.92.227.189:80/api/users/signup
 }
 
 
+POST - LOGIN
+http://3.92.227.189:80/api/users/signup
+{
+	"username": "Jeff",
+	"password": "jeffsPassword"
+}
+
 
 PATCH
 http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
 {
+	"token": "eyZC ... FwQtA48"
 	"date" : "2019-03-17",
 	"type" : "test",
 	"label" : "sample text",
