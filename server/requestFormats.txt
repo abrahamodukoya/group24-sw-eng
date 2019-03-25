@@ -1,13 +1,15 @@
 
-
+(doesn't log you in, just creates a user)
+(returns id)
 POST - REGISTER
-http://3.92.227.189:80/api/users/signup
+http://3.92.227.189:80/api/users/register
 {
 	"username": "Jeff",
 	"password": "jeffsPassword"
 }
 
 
+(returns id and token and message 'Authentication successful / failed.')
 POST - LOGIN
 http://3.92.227.189:80/api/users/signup
 {
@@ -16,7 +18,8 @@ http://3.92.227.189:80/api/users/signup
 }
 
 
-PATCH
+(returns updated user)
+PATCH - protected
 http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
 {
 	"token": "eyZC ... FwQtA48"
@@ -26,4 +29,18 @@ http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
 	"duration" : 2
 }
 
+(returns message 'User deleted.')
+DELETE - protected
+http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
+{
+	"token": "eyZC ... FwQtA48"
+}
+
+
+(returns user if found)
+GET - protected
+http://3.92.227.189:80/api/users/5c8d9cf2b4c8230381883a58
+{
+	"token": "eyZC ... FwQtA48"
+}
 
