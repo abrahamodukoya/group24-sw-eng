@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -19,7 +18,6 @@ mongoose.connect(path,{ useNewUrlParser: true })
     console.log(err);
     process.exit(1);
 });
-
 
 const userRoutes = require('./userRoutes');
 app.use("/api",userRoutes);

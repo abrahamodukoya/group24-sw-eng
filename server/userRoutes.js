@@ -9,6 +9,7 @@ const User = require('./userModel');
 const checkAuth = require('./check-auth');
 
 
+
 // NOT PROTECTED
 //http://3.92.227.189:80/api/users
 router.get('/users',(req, res, next) => {
@@ -17,7 +18,7 @@ router.get('/users',(req, res, next) => {
     .exec()
     .then(docs => {
         const response = {
-            count: docs.length, 
+            count: docs.length,
             users: docs
         };
         res.status(200).json(response);
@@ -98,7 +99,7 @@ router.post('/users/signup', (req, res, next) => {
                             error: err
                         });
                     });
-                }   
+                }
             });
         }
     });
@@ -175,11 +176,11 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
                     label: req.body.label,
                     duration: req.body.duration
                 };
-                // if no days 
+                // if no days
                 var day_len = user.data.day.length;
                 if(day_len === 0){
                     user.data.day = {activity:[]};
-                    user.data.day[0].date = date; 
+                    user.data.day[0].date = date;
                     user.data.day[0].activity[0] = data;
                     console.log('date is ======> ', user.data.day[0].date);
                 }
@@ -189,13 +190,13 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
                     // update existing day
                     if(date === user.data.day[day_len-1].date){
                         console.log('DATES EQUAL ======> ', date, ' ====> ',user.data.day[day_len-1].date);
-                        user.data.day[day_len-1].activity[activity_len] = data;       
+                        user.data.day[day_len-1].activity[activity_len] = data;
                     }
                     // new day
                     else if(date > user.data.day[day_len-1].date){
                         console.log('DATE BIGGER..........', date, ' ====> ',user.data.day[day_len-1].date);
                         user.data.day[day_len] = {activity:[]};
-                        user.data.day[day_len].date = date; 
+                        user.data.day[day_len].date = date;
                         user.data.day[day_len].activity[0] = data;
                     }
                     // if date is from the past - throw error
@@ -206,7 +207,6 @@ router.patch('/users/:id', checkAuth, (req, res, next)=> {
                     }
                 }
             }
-
             user
             // .select('-__v')
             .save()
@@ -234,11 +234,11 @@ router.get('/simpleSign/:id/:username/:password', function(req, res,next){
     const userId = req.params.id;
     const userName = req.params.username;
     const passWord = req.params.password;
-  
+
     console.log(userId);
     console.log(userName);
     console.log(passWord);
-  
+
   User.find({_id: userId, password: passWord, username: userName }, '_id', function(err, user)
   {
       if (err)
@@ -253,11 +253,11 @@ router.get('/simpleSign/:id/:username/:password', function(req, res,next){
  });
 });
 
-// get days
+// get all days
 router.get('/activity/:id/', function(req, res){
     const userId = req.params.id;
     console.log(userId)
-  
+
   User.find({_id: userId}, 'data', function(err, user)
    {
       if (err)
@@ -266,12 +266,50 @@ router.get('/activity/:id/', function(req, res){
       }
       res.json(user);
       console.log(user)
-  
+
    });
   });
 
 
-// Get for dates etc not done yet but almost finished so pls dont do it! Will be done sometime today (Sunday).
+// gives all activities for a given date
+router.get('/getDate/:id/:dateReq', async function(req, res){
+    const userId = req.params.id;
+    const dateReq = req.params.dateReq;
+    
+    const userObj = await getFullUser(userId);
+    var found = false;
+    var i = 0;
+
+    while ( i<userObj.data.day.length-1 && found ==false){
+        if (userObj.data.day[i].date == dateReq){
+           const dayReturn =  userObj.data.day[i];
+           res.json(dayReturn);
+           found == true;
+        }
+        i++;
+    }
+    res.json("None found");
+});
+
+
+
+async function getFullUser(userId) {
+    try {
+        const temp = await User.findOne({ _id: userId });
+        const user = new User(temp);
+        user
+        .save()
+        .then(result => {
+        console.log(result);
+        console.log(user.data.day.length);
+        });
+    console.log('Waited for temp ');
+    return user;
+    callback(user); 
+    } catch (e) {
+
+    }  
+};
 
 
 // delete request - PROTECTED
