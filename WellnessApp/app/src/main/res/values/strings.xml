@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Wellness App</string>
+    <string name="app_name">hSpace</string>
 
     <string-array name="activityCategoryOptions">
         <item>Fitness</item>
