@@ -60,18 +60,25 @@ public class AddActivity extends AppCompatActivity {
                         //Intent sendActivityData = new Intent(getApplicationContext(), LogActivity.class);
                         Intent sendActivityData = new Intent(getApplicationContext(), MainActivity.class);
 
+                        TextView durationErrorTextView = findViewById(R.id.durationErrorTextView);
+
                         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                         StrictMode.setThreadPolicy(policy);
 
-                        try {
-                            MyPUTRequest(userID, activityCategorySpinner.getSelectedItem().toString(), activityLabelText.getText().toString(), Integer.parseInt(activityTimeText.getText().toString()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (Integer.parseInt(activityTimeText.getText().toString()) > 24 || Integer.parseInt(activityTimeText.getText().toString()) < 1) {
+                            durationErrorTextView.setVisibility(View.VISIBLE);
+                        } else {
+                            durationErrorTextView.setVisibility(View.GONE);
+                            try {
+                                MyPUTRequest(userID, activityCategorySpinner.getSelectedItem().toString(), activityLabelText.getText().toString(), Integer.parseInt(activityTimeText.getText().toString()));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            sendActivityData.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                            startActivity(sendActivityData);
                         }
-
-                        sendActivityData.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                        startActivity(sendActivityData);
                     }
                 });
             } catch (Exception e) {

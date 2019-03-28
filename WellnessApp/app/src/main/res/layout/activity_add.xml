@@ -96,9 +96,8 @@
         app:layout_constraintTop_toBottomOf="@+id/activityTimeText"
         app:layout_constraintVertical_bias="0.0" />
 
-    <!--
-    <Button
-        android:id="@+id/goBackBtn"
+    <TextView
+        android:id="@+id/durationErrorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -107,13 +106,12 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Back"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Invalid duration!"
+        android:textColor="@android:color/holo_red_light"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/addActivityBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addActivityBtn"
-        app:layout_constraintVertical_bias="0.779" />
-    -->
+        app:layout_constraintTop_toBottomOf="@+id/activityTimeText" />
 
 </android.support.constraint.ConstraintLayout>

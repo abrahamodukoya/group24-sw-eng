@@ -80,12 +80,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/passwordText"
         app:layout_constraintVertical_bias="0.197" />
-
-    <Button
-        android:id="@+id/requestBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        tools:layout_editor_absoluteX="65dp"
-        tools:layout_editor_absoluteY="626dp" />
 </android.support.constraint.ConstraintLayout>

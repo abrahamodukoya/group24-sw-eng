@@ -10,20 +10,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".AnalyticsActivity"
-            android:parentActivityName="com.group24.wellnessapp.LogActivity">
+            android:label="Analytics">
             <meta-data
             android:name="android.support.PARENT_ACTIVITY"
             android:value="com.group24.wellnessapp.LogActivity" />
         </activity>
 
-        <activity android:name=".LogActivity"
-            android:parentActivityName="com.group24.wellnessapp.LoginActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.group24.wellnessapp.LoginActivity" />
-        </activity>
-
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"
+            android:label="Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -32,7 +26,7 @@
         </activity>
 
         <activity android:name=".AddActivity"
-            android:parentActivityName="com.group24.wellnessapp.LogActivity">
+            android:label="Add Activity">
             <meta-data
             android:name="android.support.PARENT_ACTIVITY"
             android:value="com.group24.wellnessapp.LogActivity" />
@@ -40,7 +34,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:parentActivityName="com.group24.wellnessapp.LoginActivity">
+            android:label="Log">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.group24.wellnessapp.LoginActivity" />
