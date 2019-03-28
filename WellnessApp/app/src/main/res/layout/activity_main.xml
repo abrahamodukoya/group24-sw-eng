@@ -34,38 +34,32 @@
         android:visibility="gone" />
 
     <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="350dp"
+        android:layout_height="610dp"
         android:layout_centerHorizontal="true"
-        android:id="@+id/loggedActivityScrollView">
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="90dp"
+        android:layout_marginTop="30dp"
+        android:id="@+id/scrollView">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:orientation="vertical"
             android:layout_height="wrap_content"
-            android:id="@+id/loggedActivityLinearLayout">
+            android:orientation="vertical"
+            android:id="@+id/parentLinearLayout">
 
-            <TextView
-                android:id="@+id/activityDateTextView"
-                android:layout_width="wrap_content"
+            <!--
+            <LinearLayout
+                android:layout_width="350dp"
                 android:layout_height="wrap_content"
-                android:textSize="16sp" />
-            <TextView
-                android:id="@+id/activityCategoryTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp" />
-            <TextView
-                android:id="@+id/activityLabelTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="36sp" />
-            <TextView
-                android:id="@+id/activityTimeTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="36sp" />
+                android:orientation="vertical"
+                android:background="@drawable/customborder">
+
+            </LinearLayout>
+            -->
+
         </LinearLayout>
+
     </ScrollView>
 
     <Button

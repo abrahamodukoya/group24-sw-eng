@@ -122,7 +122,6 @@ public class LogActivity extends AppCompatActivity {
         String currentDate = "2018-03-24";
 
         URL urlForGetRequest = new URL("http://3.92.227.189:80/api/getDate/" + userID + "/" + currentDate);
-        //URL urlForGetRequest = new URL("http://3.92.227.189:80/api/getDate/5c97c67625931e464ff8293f/2018-03-24");
         String readLine = null;
         HttpURLConnection connection = (HttpURLConnection) urlForGetRequest.openConnection();
         connection.setRequestMethod("GET");
