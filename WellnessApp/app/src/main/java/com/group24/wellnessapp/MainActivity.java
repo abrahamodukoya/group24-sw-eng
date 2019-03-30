@@ -3,9 +3,11 @@ package com.group24.wellnessapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +22,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
@@ -29,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
     boolean hasLoggedActivity = false;
 
     private Context context;
-    String userID = "5c97c67625931e464ff8293f";
+    //String userID = "5c97c67625931e464ff8293f";
     JSONArray jArr = null;
 
-    class loginAsyncTask extends AsyncTask<String, Void, Void> {
+    class logAsyncTask extends AsyncTask<String, Void, Void> {
         // Gets activity data from server
         protected Void doInBackground (String...userID) {
             try  {
@@ -60,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
             LinearLayout loggedActivityLinearLayout = findViewById(R.id.parentLinearLayout);
             Button addActivityFromLogBtn = findViewById(R.id.addActivityFromLogBtn);
             Button goToAnalyticsBtn = findViewById(R.id.goToAnalyticsBtn);
+            TextView logTitleTextView = findViewById(R.id.logTitleTextView);
+            TextView logDateTitleTextView = findViewById(R.id.logDateTitleTextView);
+
             if (hasLoggedActivity == false) {
                 // Hasn't logged elements
                 goToAddActivityBtn.setVisibility(View.VISIBLE);
@@ -69,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
                 loggedActivityLinearLayout.setVisibility(View.GONE);
                 addActivityFromLogBtn.setVisibility(View.GONE);
                 goToAnalyticsBtn.setVisibility(View.GONE);
+                logTitleTextView.setVisibility(View.GONE);
+                logDateTitleTextView.setVisibility(View.GONE);
 
                 // Go to AddActivity screen
                 goToAddActivityBtn.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +95,14 @@ public class MainActivity extends AppCompatActivity {
                 loggedActivityLinearLayout.setVisibility(View.VISIBLE);
                 addActivityFromLogBtn.setVisibility(View.VISIBLE);
                 goToAnalyticsBtn.setVisibility(View.VISIBLE);
+                logTitleTextView.setVisibility(View.VISIBLE);
+                logDateTitleTextView.setVisibility(View.VISIBLE);
+
+                // Get current date
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                // Set date title
+                logDateTitleTextView.setText(dateFormat.format(calendar.getTime()));
 
                 // Add activities to log screen
                 for (int i = 0; i < jArr.length(); i++) {
@@ -102,22 +118,23 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView activityCategoryTextView = new TextView(context);
                     TextView activityLabelTextView = new TextView(context);
-                    TextView activityTimeTextView = new TextView(context);
-                    TextView activityDateTextView = new TextView(context);
+                    //TextView activityTimeTextView = new TextView(context);
+                    //TextView activityDateTextView = new TextView(context);
 
                     try {
-                        activityCategoryTextView.setText(jArr.getJSONObject(i).getString("type"));
-                        activityLabelTextView.setText(jArr.getJSONObject(i).getString("label"));
-                        activityTimeTextView.setText(jArr.getJSONObject(i).getString("duration"));
+                        activityCategoryTextView.setText(Html.fromHtml("<u>" + jArr.getJSONObject(i).getString("type") + "<u>"));
+                        activityLabelTextView.setText(jArr.getJSONObject(i).getString("label") + " for " + jArr.getJSONObject(i).getString("duration") + " hours");
+                        //activityTimeTextView.setText(jArr.getJSONObject(i).getString("duration"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    activityDateTextView.setText("2018-03-24");
+                    //SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
+                    //activityDateTextView.setText(dateFormat2.format(calendar.getTime()));
 
                     newLayout.addView(activityCategoryTextView);
                     newLayout.addView(activityLabelTextView);
-                    newLayout.addView(activityTimeTextView);
-                    newLayout.addView(activityDateTextView);
+                    //newLayout.addView(activityTimeTextView);
+                    //newLayout.addView(activityDateTextView);
 
                     parentLinearLayout.addView(newLayout);
                 }
@@ -157,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         setContentView(R.layout.activity_main);
 
-        new loginAsyncTask().execute(userID);
+        new logAsyncTask().execute(LoginActivity.getUserID());
     }
 
     public static JSONArray MyGETRequest(String userID) throws IOException {
@@ -170,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
         String readLine = null;
         HttpURLConnection connection = (HttpURLConnection) urlForGetRequest.openConnection();
         connection.setRequestMethod("GET");
+
         int responseCode = connection.getResponseCode();
 
         if (responseCode == HttpURLConnection.HTTP_OK) {

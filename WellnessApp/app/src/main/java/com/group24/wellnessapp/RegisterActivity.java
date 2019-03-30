@@ -10,11 +10,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,38 +22,28 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LoginActivity extends AppCompatActivity {
-    static String userID = null;
-    static String token = null;
+public class RegisterActivity extends AppCompatActivity {
 
-    class loginAsyncTask extends AsyncTask<String, Void, Void> {
+    class registerAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (String...userID) {
             final EditText usernameEditText = findViewById(R.id.usernameEditText);
             final EditText passwordEditText = findViewById(R.id.passwordEditText);
 
-            usernameEditText.setText(getIntent().getStringExtra("username"));
-            passwordEditText.setText(getIntent().getStringExtra("password"));
-
             // Log in button to go to LogActivity screen
-            Button logInBtn = findViewById(R.id.logInBtn);
-            logInBtn.setOnClickListener(new View.OnClickListener() {
+            Button registerBtn = findViewById(R.id.registerBtn);
+            registerBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    TextView loginErrorTextView = findViewById(R.id.loginErrorTextView);
-
+                    TextView registerErrorTextView = findViewById(R.id.registerErrorTextView);
                     try {
-                        if (MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()) != null) {
-                            loginErrorTextView.setVisibility(View.GONE);
-                            try {
-                                setUserID(MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("userID", getUserID());
-                            Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
+                        if (MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()) == true) {
+                            registerErrorTextView.setVisibility(View.GONE);
+                            Intent startIntent = new Intent(getApplicationContext(), LoginActivity.class);
+                            startIntent.putExtra("username", usernameEditText.getText().toString());
+                            startIntent.putExtra("password", passwordEditText.getText().toString());
                             startActivity(startIntent);
                         } else {
-                            loginErrorTextView.setVisibility(View.VISIBLE);
+                            registerErrorTextView.setVisibility(View.VISIBLE);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -72,42 +59,19 @@ public class LoginActivity extends AppCompatActivity {
                 ActionBar actionBar = getSupportActionBar();
                 actionBar.setDisplayHomeAsUpEnabled(false);
             }
-
-            // Log in button to go to LogActivity screen
-            Button registerBtn = findViewById(R.id.registerBtn);
-            registerBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent startIntent = new Intent(getApplicationContext(), RegisterActivity.class);
-                    startActivity(startIntent);
-                }
-            });
         }
-    }
-
-    public static String getUserID() {
-        return userID;
-    }
-    public static void setUserID(String newUserID) {
-        userID = newUserID;
-    }
-    public static String getToken() {
-        return token;
-    }
-    public static void setToken(String newToken) {
-        token = newToken;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
-        new loginAsyncTask().execute("text");
+        new registerAsyncTask().execute("text");
     }
 
-    public static String MyPOSTRequest(String username, String password) throws IOException {
-        URL obj = new URL("http://3.92.227.189:80/api/users/login");
+    public static boolean MyPOSTRequest(String username, String password) throws IOException {
+        URL obj = new URL("http://3.92.227.189:80/api/users/register");
         HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
         postConnection.setRequestMethod("POST");
         postConnection.setRequestProperty("Content-Type", "application/json");
@@ -148,15 +112,13 @@ public class LoginActivity extends AppCompatActivity {
             JSONObject jObjResponse = null;
             try {
                 jObjResponse = new JSONObject(response.toString());
-                setToken(jObjResponse.getString("token"));
-                return jObjResponse.getString("_id");
             } catch (JSONException e) {
                 e.printStackTrace();
-                return null;
             }
+            return true;
         } else {
             System.out.println("POST NOT WORKED");
-            return null;
+            return false;
         }
     }
 }

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.group24.wellnessapp">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,29 +11,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AnalyticsActivity"
+        <activity android:name=".RegisterActivity"></activity>
+        <activity
+            android:name=".AnalyticsActivity"
             android:label="Analytics">
             <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.group24.wellnessapp.LogActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.group24.wellnessapp.MainActivity" />
         </activity>
-
-        <activity android:name=".LoginActivity"
+        <activity
+            android:name=".LoginActivity"
             android:label="Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
-        <activity android:name=".AddActivity"
+        <activity
+            android:name=".AddActivity"
             android:label="Add Activity">
             <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.group24.wellnessapp.LogActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.group24.wellnessapp.MainActivity" />
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:label="Log">
@@ -40,5 +43,5 @@
                 android:value="com.group24.wellnessapp.LoginActivity" />
         </activity>
     </application>
-    <uses-permission android:name="android.permission.INTERNET"/>
+
 </manifest>

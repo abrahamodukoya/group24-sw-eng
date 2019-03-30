@@ -32,7 +32,6 @@ import java.util.Calendar;
 
 public class AddActivity extends AppCompatActivity {
     private Context context;
-    String userID = "5c97c67625931e464ff8293f";
 
     class addAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (final String...userID) {
@@ -56,8 +55,6 @@ public class AddActivity extends AppCompatActivity {
                         EditText activityLabelText = findViewById(R.id.activityLabelText);
                         EditText activityTimeText = findViewById(R.id.activityTimeText);
                         Spinner activityCategorySpinner = findViewById(R.id.categorySelectionSpinner);
-                        String userID = "5c97c67625931e464ff8293f";
-                        //Intent sendActivityData = new Intent(getApplicationContext(), LogActivity.class);
                         Intent sendActivityData = new Intent(getApplicationContext(), MainActivity.class);
 
                         TextView durationErrorTextView = findViewById(R.id.durationErrorTextView);
@@ -70,7 +67,7 @@ public class AddActivity extends AppCompatActivity {
                         } else {
                             durationErrorTextView.setVisibility(View.GONE);
                             try {
-                                MyPUTRequest(userID, activityCategorySpinner.getSelectedItem().toString(), activityLabelText.getText().toString(), Integer.parseInt(activityTimeText.getText().toString()));
+                                MyPUTRequest(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString(), activityLabelText.getText().toString(), Integer.parseInt(activityTimeText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -100,7 +97,7 @@ public class AddActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        new addAsyncTask().execute(userID);
+        new addAsyncTask().execute(LoginActivity.getUserID());
     }
 
     public static void MyPUTRequest(String userID, String type, String label, int duration) throws IOException {
@@ -120,6 +117,7 @@ public class AddActivity extends AppCompatActivity {
             jObj.put("type", type);
             jObj.put("label", label);
             jObj.put("duration", duration);
+            jObj.put("token", LoginActivity.getToken());
         } catch (JSONException e) {
             e.printStackTrace();
         }
