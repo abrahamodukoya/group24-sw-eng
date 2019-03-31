@@ -1,4 +1,3 @@
-
 // user model for the database, a user will have a data array
 // data arary consists of an array of day objects
 // day object consits of corresponding date, and an array of activities for that day

@@ -1,4 +1,3 @@
-
 // import dependencies
 const Joi = require('joi');
 const express = require('express');
@@ -306,7 +305,7 @@ router.get('/activity/:id/', function(req, res){
 
 
 // gives all activities for a given date
-router.get('/getDate/:id/:dateReq', async function(req, res){
+router.get('/getDate/:id/:dateReq/', async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     
@@ -314,9 +313,9 @@ router.get('/getDate/:id/:dateReq', async function(req, res){
     var found = false;
     var i = 0;
 
-    while ( i<userObj.data.day.length-1 && found ==false){
+    while ( i<userObj.data.day.length && found ==false){
         if (userObj.data.day[i].date == dateReq){
-           const dayReturn =  userObj.data.day[i];
+           const dayReturn =  userObj.data.day[i].activity;
            res.json(dayReturn);
            found == true;
         }
@@ -326,7 +325,158 @@ router.get('/getDate/:id/:dateReq', async function(req, res){
 });
 
 
+// get daily stat
+router.get('/dailyStat/:id/:dateReq', async function(req, res){
+    const userId = req.params.id;
+    const dateReq = req.params.dateReq;
+    const userObj = await getFullUser(userId);
+   res.send(getDaily(userObj,dateReq));
+});
 
+
+// get weekly stat
+router.get('/weeklyStat/:id/:dateReq', async function(req, res){
+    const userId = req.params.id;
+    const dateReq = req.params.dateReq;
+    const userObj = await getFullUser(userId);
+
+    var date = new Date(dateReq);
+    var dateWeekAgo = new Date(dateReq);
+    dateWeekAgo.setDate(date.getDate() - 7);
+    var weeklyStat = new statObj(0,0,0,0,0);
+
+    // console.log('Date :  ' + date)
+    // console.log('Date one week ago:  '+dateWeekAgo)
+
+    // we will never have to check more days than this if
+    // the current date is entered.
+    var limit = userObj.data.day.length - 7;
+
+    var lowerFound = false;
+    var i = userObj.data.day.length - 1;
+    
+    while( i >= 0 && i > limit && lowerFound ==false){
+        var dateCheck = new Date(userObj.data.day[i].date);
+       if(dateCheck<=date && dateWeekAgo <= dateCheck){
+            var temp = getDaily(userObj, userObj.data.day[i].date);
+            // console.log('Adding this day  '+ dateCheck)
+            // console.log('This is one week ago  '+ dateWeekAgo)
+            weeklyStat.fitCount = weeklyStat.fitCount + temp.fitCount;
+            weeklyStat.socialCount = weeklyStat.socialCount + temp.socialCount;
+            weeklyStat.restCount = weeklyStat.restCount + temp.restCount;
+            weeklyStat.sleepCount = weeklyStat.sleepCount + temp.sleepCount;
+            weeklyStat.prodCount = weeklyStat.prodCount + temp.prodCount;
+        }
+        else{
+            lowerFound = true;
+        }
+        i--;
+    }
+    console.log(weeklyStat);
+    res.send(weeklyStat);
+});
+
+// get monthly stat
+router.get('/monthlyStat/:id/:dateReq', async function(req, res){
+    const userId = req.params.id;
+    const dateReq = req.params.dateReq;
+    const userObj = await getFullUser(userId);
+
+    var date = new Date(dateReq);
+    var dateMonthAgo = new Date(dateReq);
+    dateMonthAgo.setDate(date.getDate() - 31);
+    var monthlyStat = new statObj(0,0,0,0,0);
+
+    // console.log('Date :  ' + date)
+    // console.log('Date one week ago:  '+dateMonthAgo)
+
+    // we will never have to check more days than this if
+    // the current date is entered.
+
+    var limit = userObj.data.day.length - 31;
+
+    var lowerFound = false;
+    var i = userObj.data.day.length - 1;
+    
+    while( i >= 0 && i > limit && lowerFound ==false){
+        var dateCheck = new Date(userObj.data.day[i].date);
+       if(dateCheck<=date && dateMonthAgo <= dateCheck){
+            var temp = getDaily(userObj, userObj.data.day[i].date);
+            // console.log('Adding this day  '+ dateCheck)
+            // console.log('This is one month ago  '+ dateMonthAgo)
+            monthlyStat.fitCount = monthlyStat.fitCount + temp.fitCount;
+            monthlyStat.socialCount = monthlyStat.socialCount + temp.socialCount;
+            monthlyStat.restCount = monthlyStat.restCount + temp.restCount;
+            monthlyStat.sleepCount = monthlyStat.sleepCount + temp.sleepCount;
+            monthlyStat.prodCount = monthlyStat.prodCount + temp.prodCount;
+        }
+        else{
+            lowerFound = true;
+        }
+        i--;
+    }
+    console.log(monthlyStat);
+    res.send(monthlyStat);
+});
+
+// function to get stats for one day
+function getDaily(userObj, dateReq){
+    var productivityCount = 0; var socialCount = 0; var restCount = 0; var sleepCount = 0;  var fitCount = 0;
+
+    var found = false;
+    var i = -1;
+    var j =0;
+
+    while ( i<userObj.data.day.length-1 && found ==false){
+        i++;
+        if (userObj.data.day[i].date == dateReq){
+           found = true;
+        }
+    }
+
+    while(j<userObj.data.day[i].activity.length){
+        if(userObj.data.day[i].activity[j].type=='productivity'){
+            var productivityString =userObj.data.day[i].activity[j].duration;
+            var prod = parseInt(productivityString, 10);
+            productivityCount = productivityCount + prod;
+        }
+        else if(userObj.data.day[i].activity[j].type=='social'){
+            var socialString =userObj.data.day[i].activity[j].duration;
+            var social = parseInt(socialString, 10);
+            socialCount = socialCount + social;
+        }
+        else if(userObj.data.day[i].activity[j].type=='rest'){
+            var restString =userObj.data.day[i].activity[j].duration;
+            var rest = parseInt(restString, 10);
+            restCount = restCount + rest;
+        }
+        else if(userObj.data.day[i].activity[j].type=='fitness'){
+            var fitnessString = userObj.data.day[i].activity[j].duration;
+            var fitness = parseInt(fitnessString, 10);
+            fitCount = fitCount + fitness;
+        }
+        else if(userObj.data.day[i].activity[j].type=='sleep'){
+            var sleepString =userObj.data.day[i].activity[j].duration;
+            var sleep = parseInt(sleepString, 10);
+            sleepCount = sleepCount + sleep;
+        }
+        j++;
+    } 
+    var daily = new statObj(productivityCount, socialCount, restCount, sleepCount, fitCount);
+    console.log(daily)
+    return daily;
+}
+
+// stat object that gets sent back to frontend
+var statObj = function(prodCount, socialCount, restCount, sleepCount, fitCount) {
+    this.prodCount = prodCount;
+    this.socialCount = socialCount;
+    this.restCount = restCount;
+    this.sleepCount = sleepCount;
+    this.fitCount = fitCount;
+  }
+
+// returns full user object
 async function getFullUser(userId) {
     try {
         const temp = await User.findOne({ _id: userId });
@@ -339,11 +489,13 @@ async function getFullUser(userId) {
         });
     console.log('Waited for temp ');
     return user;
-    callback(user); 
-    } catch (e) {
+    //callback(user); 
+    
+    }catch (e) {
 
     }  
 };
+
 
 
 // delete request - PROTECTED
