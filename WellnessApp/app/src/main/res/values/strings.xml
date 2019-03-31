@@ -2,9 +2,11 @@
     <string name="app_name">hSpace</string>
 
     <string-array name="activityCategoryOptions">
-        <item>Fitness</item>
         <item>Productivity</item>
+        <item>Rest</item>
         <item>Sleep</item>
+        <item>Fitness</item>
+        <item>Social</item>
     </string-array>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

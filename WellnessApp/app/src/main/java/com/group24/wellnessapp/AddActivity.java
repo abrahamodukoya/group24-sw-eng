@@ -67,7 +67,7 @@ public class AddActivity extends AppCompatActivity {
                         } else {
                             durationErrorTextView.setVisibility(View.GONE);
                             try {
-                                MyPUTRequest(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString(), activityLabelText.getText().toString(), Integer.parseInt(activityTimeText.getText().toString()));
+                                MyPUTRequest(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString().toLowerCase(), activityLabelText.getText().toString().toLowerCase(), Integer.parseInt(activityTimeText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
