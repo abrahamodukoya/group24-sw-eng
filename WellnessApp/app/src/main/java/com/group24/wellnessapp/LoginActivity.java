@@ -17,6 +17,7 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,11 +30,13 @@ public class LoginActivity extends AppCompatActivity {
     static String userID = null;
     static String token = null;
 
+    // AsyncTask for JSON requests
     class loginAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (String...userID) {
             final EditText usernameEditText = findViewById(R.id.usernameEditText);
             final EditText passwordEditText = findViewById(R.id.passwordEditText);
 
+            // Fill text fields if previously filled
             usernameEditText.setText(getIntent().getStringExtra("username"));
             passwordEditText.setText(getIntent().getStringExtra("password"));
 
@@ -44,15 +47,15 @@ public class LoginActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     TextView loginErrorTextView = findViewById(R.id.loginErrorTextView);
 
+                    // Test login credentials
                     try {
-                        if (MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()) != null) {
+                        if (userLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString()) != null) {
                             loginErrorTextView.setVisibility(View.GONE);
                             try {
-                                setUserID(MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
+                                setUserID(userLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            Log.d("userID", getUserID());
                             Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(startIntent);
                         } else {
@@ -73,18 +76,18 @@ public class LoginActivity extends AppCompatActivity {
                 actionBar.setDisplayHomeAsUpEnabled(false);
             }
 
-            // Log in button to go to LogActivity screen
-            Button registerBtn = findViewById(R.id.registerBtn);
-            registerBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent startIntent = new Intent(getApplicationContext(), RegisterActivity.class);
-                    startActivity(startIntent);
+            // Go to register screen
+            TextView registerTextView = findViewById(R.id.registerTextView);
+            registerTextView.setOnClickListener(new View.OnClickListener(){
+                public void onClick(View v){
+                    Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                    startActivity(intent);
                 }
             });
         }
     }
 
+    // Getters and setters for userID and token
     public static String getUserID() {
         return userID;
     }
@@ -103,15 +106,18 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Start AsyncTask
         new loginAsyncTask().execute("text");
     }
 
-    public static String MyPOSTRequest(String username, String password) throws IOException {
+    public static String userLogin(String username, String password) throws IOException {
+        // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/login");
         HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
         postConnection.setRequestMethod("POST");
         postConnection.setRequestProperty("Content-Type", "application/json");
 
+        // Create JSON object with username and password
         JSONObject jObj = new JSONObject();
         try {
             jObj.put("username", username);
@@ -120,18 +126,18 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Log.d("jObj", jObj.toString());
-
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        // Send data
         postConnection.setDoOutput(true);
         OutputStream os = postConnection.getOutputStream();
         os.write(jObj.toString().getBytes());
         os.flush();
         os.close();
 
+        // Get response
         int responseCode = postConnection.getResponseCode();
         System.out.println("POST Response Code :  " + responseCode);
         System.out.println("POST Response Message : " + postConnection.getResponseMessage());
@@ -143,7 +149,8 @@ public class LoginActivity extends AppCompatActivity {
             while ((inputLine = in .readLine()) != null) {
                 response.append(inputLine);
             } in .close();
-            // print result
+
+            // Print result
             System.out.println(response.toString());
             JSONObject jObjResponse = null;
             try {
@@ -155,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
                 return null;
             }
         } else {
+            // Error message
             System.out.println("POST NOT WORKED");
             return null;
         }

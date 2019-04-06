@@ -30,16 +30,15 @@ import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity {
     boolean hasLoggedActivity = false;
-
     private Context context;
-    //String userID = "5c97c67625931e464ff8293f";
     JSONArray jArr = null;
 
+    // AsyncTask for JSON requests
     class logAsyncTask extends AsyncTask<String, Void, Void> {
         // Gets activity data from server
         protected Void doInBackground (String...userID) {
             try  {
-                jArr = MyGETRequest(userID[0]);
+                jArr = getActivities(LoginActivity.getUserID());
                 // If there are activities today
                 if (jArr != null && jArr.length() > 0) {
                     // We have logged activities
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
             // Has logged elements
             ScrollView loggedActivityScrollView = findViewById(R.id.scrollView);
             LinearLayout loggedActivityLinearLayout = findViewById(R.id.parentLinearLayout);
+            Button goToAdviceBtn = findViewById(R.id.goToAdviceBtn);
             Button addActivityFromLogBtn = findViewById(R.id.addActivityFromLogBtn);
             Button goToAnalyticsBtn = findViewById(R.id.goToAnalyticsBtn);
             TextView logTitleTextView = findViewById(R.id.logTitleTextView);
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 goToAnalyticsBtn.setVisibility(View.GONE);
                 logTitleTextView.setVisibility(View.GONE);
                 logDateTitleTextView.setVisibility(View.GONE);
+                goToAdviceBtn.setVisibility(View.GONE);
 
                 // Go to AddActivity screen
                 goToAddActivityBtn.setOnClickListener(new View.OnClickListener() {
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 goToAnalyticsBtn.setVisibility(View.VISIBLE);
                 logTitleTextView.setVisibility(View.VISIBLE);
                 logDateTitleTextView.setVisibility(View.VISIBLE);
+                goToAdviceBtn.setVisibility(View.VISIBLE);
 
                 // Get current date
                 Calendar calendar = Calendar.getInstance();
@@ -105,12 +107,11 @@ public class MainActivity extends AppCompatActivity {
                 logDateTitleTextView.setText(dateFormat.format(calendar.getTime()));
 
                 // Add activities to log screen
-                for (int i = 0; i < jArr.length(); i++) {
+                for (int i = jArr.length()-1; i >= 0; i--) {
                     LinearLayout parentLinearLayout = findViewById(R.id.parentLinearLayout);
 
                     LinearLayout newLayout = new LinearLayout(context);
-                    //LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(900, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.topMargin = 25;
                     newLayout.setLayoutParams(layoutParams);
                     newLayout.setBackgroundResource(R.drawable.customborder);
@@ -118,23 +119,16 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView activityCategoryTextView = new TextView(context);
                     TextView activityLabelTextView = new TextView(context);
-                    //TextView activityTimeTextView = new TextView(context);
-                    //TextView activityDateTextView = new TextView(context);
 
                     try {
-                        activityCategoryTextView.setText(Html.fromHtml("<u>" + jArr.getJSONObject(i).getString("type") + "<u>"));
-                        activityLabelTextView.setText(jArr.getJSONObject(i).getString("label") + " for " + jArr.getJSONObject(i).getString("duration") + " hours");
-                        //activityTimeTextView.setText(jArr.getJSONObject(i).getString("duration"));
+                        activityCategoryTextView.setText(Html.fromHtml("<u>" + jArr.getJSONObject(i).getString("type").substring(0, 1).toUpperCase() + jArr.getJSONObject(i).getString("type").substring(1) + "<u>"));
+                        activityLabelTextView.setText(jArr.getJSONObject(i).getString("label").substring(0, 1).toUpperCase() + jArr.getJSONObject(i).getString("label").substring(1) + " for " + jArr.getJSONObject(i).getString("duration") + " hours");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    //SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
-                    //activityDateTextView.setText(dateFormat2.format(calendar.getTime()));
 
                     newLayout.addView(activityCategoryTextView);
                     newLayout.addView(activityLabelTextView);
-                    //newLayout.addView(activityTimeTextView);
-                    //newLayout.addView(activityDateTextView);
 
                     parentLinearLayout.addView(newLayout);
                 }
@@ -144,6 +138,16 @@ public class MainActivity extends AppCompatActivity {
                     ActionBar actionBar = getSupportActionBar();
                     actionBar.setDisplayHomeAsUpEnabled(false);
                 }
+
+                // Go to Advice screen
+                Button goToAdvice = findViewById(R.id.goToAdviceBtn);
+                goToAdvice.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent startIntent = new Intent(getApplicationContext(), AdviceActivity.class);
+                        startActivity(startIntent);
+                    }
+                });
 
                 // Go to AddActivity screen
                 Button addActivityFromLog = findViewById(R.id.addActivityFromLogBtn);
@@ -174,22 +178,24 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         setContentView(R.layout.activity_main);
 
+        // Start AsyncTask
         new logAsyncTask().execute(LoginActivity.getUserID());
     }
 
-    public static JSONArray MyGETRequest(String userID) throws IOException {
+    public static JSONArray getActivities(String userID) throws IOException {
         // Get current date
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = dateFormat.format(calendar.getTime());
 
+        // Connect to server
         URL urlForGetRequest = new URL("http://3.92.227.189:80/api/getDate/" + userID + "/" + currentDate);
         String readLine = null;
         HttpURLConnection connection = (HttpURLConnection) urlForGetRequest.openConnection();
         connection.setRequestMethod("GET");
 
+        // Get response
         int responseCode = connection.getResponseCode();
-
         if (responseCode == HttpURLConnection.HTTP_OK) {
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuffer response = new StringBuffer();
@@ -197,28 +203,23 @@ public class MainActivity extends AppCompatActivity {
                 response.append(readLine);
             } in.close();
 
-            JSONObject jObj = null;
             JSONArray jArr = null;
 
             if (response.toString().equals("\"None found\"")) {
+                // Error
                 return null;
             } else {
+                // Success
                 try {
-                    jObj = new JSONObject(response.toString());
+                    jArr = new JSONArray(response.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                try {
-                    jArr = jObj.getJSONArray("activity");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
                 return jArr;
             }
         } else {
-            Log.d("1", "GET NOT WORKED");
+            // Error message
+            Log.d("Get activities error", "GET NOT WORKED");
             return null;
         }
     }

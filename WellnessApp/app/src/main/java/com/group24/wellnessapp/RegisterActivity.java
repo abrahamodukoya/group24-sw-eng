@@ -24,6 +24,7 @@ import java.net.URL;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    // AsyncTask for JSON requests
     class registerAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (String...userID) {
             final EditText usernameEditText = findViewById(R.id.usernameEditText);
@@ -36,13 +37,16 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     TextView registerErrorTextView = findViewById(R.id.registerErrorTextView);
                     try {
-                        if (MyPOSTRequest(usernameEditText.getText().toString(), passwordEditText.getText().toString()) == true) {
+                        if (registerUser(usernameEditText.getText().toString(), passwordEditText.getText().toString()) == true) {
+                            // Success
+                            // Send user credentials to Login screen
                             registerErrorTextView.setVisibility(View.GONE);
                             Intent startIntent = new Intent(getApplicationContext(), LoginActivity.class);
                             startIntent.putExtra("username", usernameEditText.getText().toString());
                             startIntent.putExtra("password", passwordEditText.getText().toString());
                             startActivity(startIntent);
                         } else {
+                            // Error
                             registerErrorTextView.setVisibility(View.VISIBLE);
                         }
                     } catch (IOException e) {
@@ -67,15 +71,18 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        // Start AsyncTask
         new registerAsyncTask().execute("text");
     }
 
-    public static boolean MyPOSTRequest(String username, String password) throws IOException {
+    public static boolean registerUser(String username, String password) throws IOException {
+        // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/register");
         HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
         postConnection.setRequestMethod("POST");
         postConnection.setRequestProperty("Content-Type", "application/json");
 
+        // Create JSon object with user credentials
         JSONObject jObj = new JSONObject();
         try {
             jObj.put("username", username);
@@ -84,22 +91,23 @@ public class RegisterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Log.d("jObj", jObj.toString());
-
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        // Send data
         postConnection.setDoOutput(true);
         OutputStream os = postConnection.getOutputStream();
         os.write(jObj.toString().getBytes());
         os.flush();
         os.close();
 
+        // Get response
         int responseCode = postConnection.getResponseCode();
         System.out.println("POST Response Code :  " + responseCode);
         System.out.println("POST Response Message : " + postConnection.getResponseMessage());
-        if (responseCode == HttpURLConnection.HTTP_CREATED) { //success
+        if (responseCode == HttpURLConnection.HTTP_CREATED) {
+            // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     postConnection.getInputStream()));
             String inputLine;
@@ -107,7 +115,8 @@ public class RegisterActivity extends AppCompatActivity {
             while ((inputLine = in .readLine()) != null) {
                 response.append(inputLine);
             } in .close();
-            // print result
+
+            // Print result
             System.out.println(response.toString());
             JSONObject jObjResponse = null;
             try {
@@ -117,6 +126,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
             return true;
         } else {
+            // Error message
             System.out.println("POST NOT WORKED");
             return false;
         }

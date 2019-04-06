@@ -8,6 +8,12 @@
         <item>Fitness</item>
         <item>Social</item>
     </string-array>
+    <string-array name="statOptions">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string name="register_text"><u>Don\'t have an account? Register</u></string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

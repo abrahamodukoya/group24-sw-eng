@@ -33,20 +33,18 @@ import java.util.Calendar;
 public class AddActivity extends AppCompatActivity {
     private Context context;
 
+    // AsyncTask for JSON requests
     class addAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (final String...userID) {
             try  {
-                // Activity category drop down menu
+                // Activity type drop down menu
                 Spinner categoryDropDown = findViewById(R.id.categorySelectionSpinner);
-                // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                         R.array.activityCategoryOptions, android.R.layout.simple_spinner_item);
-                // Specify the layout to use when the list of choices appears
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // Apply the adapter to the spinner
                 categoryDropDown.setAdapter(adapter);
 
-                // Log new activity and send data to MainActivity screen
+                // Log new activity
                 Button addActivityBtn = findViewById(R.id.addActivityBtn);
                 addActivityBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -55,23 +53,24 @@ public class AddActivity extends AppCompatActivity {
                         EditText activityLabelText = findViewById(R.id.activityLabelText);
                         EditText activityTimeText = findViewById(R.id.activityTimeText);
                         Spinner activityCategorySpinner = findViewById(R.id.categorySelectionSpinner);
-                        Intent sendActivityData = new Intent(getApplicationContext(), MainActivity.class);
-
                         TextView durationErrorTextView = findViewById(R.id.durationErrorTextView);
+                        Intent sendActivityData = new Intent(getApplicationContext(), MainActivity.class);
 
                         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                         StrictMode.setThreadPolicy(policy);
 
+                        // Send data to server and go to MainActivity if input valid
                         if (Integer.parseInt(activityTimeText.getText().toString()) > 24 || Integer.parseInt(activityTimeText.getText().toString()) < 1) {
                             durationErrorTextView.setVisibility(View.VISIBLE);
                         } else {
                             durationErrorTextView.setVisibility(View.GONE);
                             try {
-                                MyPUTRequest(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString().toLowerCase(), activityLabelText.getText().toString().toLowerCase(), Integer.parseInt(activityTimeText.getText().toString()));
+                                sendActivity(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString().toLowerCase(), activityLabelText.getText().toString().toLowerCase(), Integer.parseInt(activityTimeText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
 
+                            // Clear activity stack for this activity
                             sendActivityData.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                             startActivity(sendActivityData);
@@ -97,10 +96,12 @@ public class AddActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
+        // Start AsyncTask
         new addAsyncTask().execute(LoginActivity.getUserID());
     }
 
-    public static void MyPUTRequest(String userID, String type, String label, int duration) throws IOException {
+    public static void sendActivity(String userID, String type, String label, int duration) throws IOException {
+        // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/" + userID);
         HttpURLConnection putConnection = (HttpURLConnection) obj.openConnection();
         putConnection.setRequestMethod("PUT");
@@ -111,29 +112,29 @@ public class AddActivity extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = dateFormat.format(calendar.getTime());
 
+        // Create activity JSON object
         JSONObject jObj = new JSONObject();
         try {
             jObj.put("date", currentDate);
             jObj.put("type", type);
             jObj.put("label", label);
             jObj.put("duration", duration);
-            jObj.put("token", LoginActivity.getToken());
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Log.d("jObj", jObj.toString());
-
+        // Send activity
         putConnection.setDoOutput(true);
         OutputStream os = putConnection.getOutputStream();
         os.write(jObj.toString().getBytes());
         os.flush();
         os.close();
 
+        // Get and print response
         int responseCode = putConnection.getResponseCode();
         System.out.println("PUT Response Code :  " + responseCode);
         System.out.println("PUT Response Message : " + putConnection.getResponseMessage());
-        if (responseCode == HttpURLConnection.HTTP_CREATED) { //success
+        if (responseCode == HttpURLConnection.HTTP_CREATED) {
             BufferedReader in = new BufferedReader(new InputStreamReader(putConnection.getInputStream()));
             String inputLine;
             StringBuffer response = new StringBuffer();
@@ -142,9 +143,9 @@ public class AddActivity extends AppCompatActivity {
                 response.append(inputLine);
             } in .close();
 
-            // print result
             System.out.println(response.toString());
         } else {
+            // Error message
             System.out.println("PUT NOT WORKED");
         }
     }

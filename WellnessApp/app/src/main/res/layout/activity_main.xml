@@ -19,7 +19,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="64dp"
         android:text="+"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:background="#3dddb7"
+        android:textColor="#FFFFFF"/>
 
     <TextView
         android:id="@+id/addActivityPromptTextView"
@@ -56,7 +58,7 @@
         android:visibility="visible" />
 
     <ScrollView
-        android:layout_width="350dp"
+        android:layout_width="match_parent"
         android:layout_height="610dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
@@ -65,7 +67,7 @@
         android:id="@+id/scrollView">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/parentLinearLayout">
@@ -75,13 +77,28 @@
     </ScrollView>
 
     <Button
+        android:id="@+id/goToAdviceBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/addActivityFromLogBtn"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="-134dp"
+        android:layout_marginRight="137dp"
+        android:layout_marginBottom="16dp"
+        android:text="Advice"
+        android:background="#3dddb7"
+        android:textColor="#FFFFFF" />
+
+    <Button
         android:id="@+id/addActivityFromLogBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
-        android:text="+" />
+        android:text="+"
+        android:background="#3dddb7"
+        android:textColor="#FFFFFF" />
 
     <Button
         android:id="@+id/goToAnalyticsBtn"
@@ -92,5 +109,7 @@
         android:layout_marginLeft="137dp"
         android:layout_marginRight="-134dp"
         android:layout_marginBottom="16dp"
-        android:text="Analytics" />
+        android:text="Analytics"
+        android:background="#3dddb7"
+        android:textColor="#FFFFFF" />
 </RelativeLayout>
