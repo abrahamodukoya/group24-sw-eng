@@ -48,173 +48,90 @@ public class AnalyticsActivity extends AppCompatActivity {
     // AsyncTask for JSON requests
     class analyticsAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (String...userID) {
-            // DAILY
-            BarChart dailyChart = (BarChart)findViewById(R.id.barGraphDaily);
-            try {
-                jObj = getGraphData(LoginActivity.getUserID(), "daily");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            BarChart chart = null;
+
             int prodCount = -1;
             int socialCount = -1;
             int restCount = -1;
             int sleepCount = -1;
             int fitCount = -1;
 
-            try {
-                prodCount = Integer.parseInt(jObj.getString("prodCount"));
-                socialCount = Integer.parseInt(jObj.getString("socialCount"));
-                restCount = Integer.parseInt(jObj.getString("restCount"));
-                sleepCount = Integer.parseInt(jObj.getString("sleepCount"));
-                fitCount = Integer.parseInt(jObj.getString("fitCount"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            BarDataSet set = null;
+            ArrayList<BarEntry> entries = null;
+
+            String chartType = "";
+            String chartTitle = "";
+
+            for (int i = 0; i < 3; i++) {
+                switch(i) {
+                    case 0:
+                        chart = (BarChart)findViewById(R.id.barGraphDaily);
+                        chartType = "daily";
+                        chartTitle = "Your Daily Activities";
+                        break;
+                    case 1:
+                        chart = (BarChart)findViewById(R.id.barGraphWeekly);
+                        chartType = "weekly";
+                        chartTitle = "Your Weekly Activities";
+                        break;
+                    case 2:
+                        chart = (BarChart)findViewById(R.id.barGraphMonthly);
+                        chartType = "monthly";
+                        chartTitle = "Your Monthly Activities";
+                        break;
+                }
+
+                try {
+                    jObj = getGraphData(LoginActivity.getUserID(), chartType);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    prodCount = Integer.parseInt(jObj.getString("prodCount"));
+                    socialCount = Integer.parseInt(jObj.getString("socialCount"));
+                    restCount = Integer.parseInt(jObj.getString("restCount"));
+                    sleepCount = Integer.parseInt(jObj.getString("sleepCount"));
+                    fitCount = Integer.parseInt(jObj.getString("fitCount"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                entries = new ArrayList<>();
+                entries.add(new BarEntry(0, prodCount));
+                entries.add(new BarEntry(1, socialCount));
+                entries.add(new BarEntry(2, restCount));
+                entries.add(new BarEntry(3, sleepCount));
+                entries.add(new BarEntry(4, fitCount));
+                set = new BarDataSet(entries, chartTitle);
+
+                chart.setDrawBarShadow(false);
+                chart.setDrawValueAboveBar(true);
+                chart.setPinchZoom(false);
+                chart.setDrawGridBackground(false);
+
+                set.setColors(new int[] {R.color.teal1, R.color.teal2, R.color.teal3, R.color.teal4, R.color.teal5}, context);
+
+                BarData data = new BarData(set);
+                data.setBarWidth(0.9f);
+                chart.setData(data);
+
+                String[] months = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
+                XAxis xAxis = chart.getXAxis();
+                xAxis.setValueFormatter(new MyXAxisValueFormatter(months));
+
+                xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
+                xAxis.setGranularity(1);
+                xAxis.setCenterAxisLabels(false);
+
+                YAxis yAxis = chart.getAxisLeft();
+                yAxis.setAxisMinimum(0);
+                yAxis.setDrawGridLines(false);
+                xAxis.setDrawGridLines(false);
+
+                chart.getDescription().setEnabled(false);
+
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             }
-
-            dailyChart.setDrawBarShadow(false);
-            dailyChart.setDrawValueAboveBar(true);
-            dailyChart.setPinchZoom(false);
-            dailyChart.setDrawGridBackground(false);
-
-            ArrayList<BarEntry> entries = new ArrayList<>();
-            entries.add(new BarEntry(0, prodCount));
-            entries.add(new BarEntry(1, socialCount));
-            entries.add(new BarEntry(2, restCount));
-            entries.add(new BarEntry(3, sleepCount));
-            entries.add(new BarEntry(4, fitCount));
-
-            BarDataSet set = new BarDataSet(entries, "Your Daily Activities");
-            set.setColors(new int[] {R.color.teal1, R.color.teal2, R.color.teal3, R.color.teal4, R.color.teal5}, context);
-
-            BarData data = new BarData(set);
-            data.setBarWidth(0.9f);
-            dailyChart.setData(data);
-
-            String[] months = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
-            XAxis xAxis = dailyChart.getXAxis();
-            xAxis.setValueFormatter(new MyXAxisValueFormatter(months));
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-            xAxis.setGranularity(1);
-            xAxis.setCenterAxisLabels(false);
-
-            YAxis yAxis = dailyChart.getAxisLeft();
-            yAxis.setAxisMinimum(0);
-            yAxis.setDrawGridLines(false);
-            xAxis.setDrawGridLines(false);
-
-            dailyChart.getDescription().setEnabled(false);
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-            // WEEKLY
-            BarChart weeklyChart = (BarChart)findViewById(R.id.barGraphWeekly);
-            try {
-                jObj = getGraphData(LoginActivity.getUserID(), "weekly");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                prodCount = Integer.parseInt(jObj.getString("prodCount"));
-                socialCount = Integer.parseInt(jObj.getString("socialCount"));
-                restCount = Integer.parseInt(jObj.getString("restCount"));
-                sleepCount = Integer.parseInt(jObj.getString("sleepCount"));
-                fitCount = Integer.parseInt(jObj.getString("fitCount"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            weeklyChart.setDrawBarShadow(false);
-            weeklyChart.setDrawValueAboveBar(true);
-            weeklyChart.setPinchZoom(false);
-            weeklyChart.setDrawGridBackground(false);
-
-            entries = new ArrayList<>();
-            entries.add(new BarEntry(0, prodCount));
-            entries.add(new BarEntry(1, socialCount));
-            entries.add(new BarEntry(2, restCount));
-            entries.add(new BarEntry(3, sleepCount));
-            entries.add(new BarEntry(4, fitCount));
-
-            set = new BarDataSet(entries, "Your Weekly Activities");
-            set.setColors(new int[] {R.color.teal1, R.color.teal2, R.color.teal3, R.color.teal4, R.color.teal5}, context);
-
-            data = new BarData(set);
-            data.setBarWidth(0.9f);
-            weeklyChart.setData(data);
-
-            months = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
-            xAxis = weeklyChart.getXAxis();
-            xAxis.setValueFormatter(new MyXAxisValueFormatter(months));
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-            xAxis.setGranularity(1);
-            xAxis.setCenterAxisLabels(false);
-
-            yAxis = weeklyChart.getAxisLeft();
-            yAxis.setAxisMinimum(0);
-            yAxis.setDrawGridLines(false);
-            xAxis.setDrawGridLines(false);
-
-            weeklyChart.getDescription().setEnabled(false);
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-            // MONTHLY
-            BarChart monthlyChart = (BarChart)findViewById(R.id.barGraphMonthly);
-            try {
-                jObj = getGraphData(LoginActivity.getUserID(), "monthly");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                prodCount = Integer.parseInt(jObj.getString("prodCount"));
-                socialCount = Integer.parseInt(jObj.getString("socialCount"));
-                restCount = Integer.parseInt(jObj.getString("restCount"));
-                sleepCount = Integer.parseInt(jObj.getString("sleepCount"));
-                fitCount = Integer.parseInt(jObj.getString("fitCount"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            monthlyChart.setDrawBarShadow(false);
-            monthlyChart.setDrawValueAboveBar(true);
-            monthlyChart.setPinchZoom(false);
-            monthlyChart.setDrawGridBackground(false);
-
-            entries = new ArrayList<>();
-            entries.add(new BarEntry(0, prodCount));
-            entries.add(new BarEntry(1, socialCount));
-            entries.add(new BarEntry(2, restCount));
-            entries.add(new BarEntry(3, sleepCount));
-            entries.add(new BarEntry(4, fitCount));
-
-            set = new BarDataSet(entries, "Your Monthly Activities");
-            set.setColors(new int[] {R.color.teal1, R.color.teal2, R.color.teal3, R.color.teal4, R.color.teal5}, context);
-
-            data = new BarData(set);
-            data.setBarWidth(0.9f);
-            monthlyChart.setData(data);
-
-            months = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
-            xAxis = monthlyChart.getXAxis();
-            xAxis.setValueFormatter(new MyXAxisValueFormatter(months));
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-            xAxis.setGranularity(1);
-            xAxis.setCenterAxisLabels(false);
-
-            yAxis = monthlyChart.getAxisLeft();
-            yAxis.setAxisMinimum(0);
-            yAxis.setDrawGridLines(false);
-            xAxis.setDrawGridLines(false);
-
-            monthlyChart.getDescription().setEnabled(false);
-
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
             return null;
         }
 
