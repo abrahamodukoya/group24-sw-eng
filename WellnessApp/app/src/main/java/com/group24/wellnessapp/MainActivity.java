@@ -14,11 +14,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -192,10 +190,30 @@ public class MainActivity extends AppCompatActivity {
         URL urlForGetRequest = new URL("http://3.92.227.189:80/api/getDate/" + userID + "/" + currentDate);
         String readLine = null;
         HttpURLConnection connection = (HttpURLConnection) urlForGetRequest.openConnection();
-        connection.setRequestMethod("GET");
+        connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        JSONObject jObject = new JSONObject();
+        try {
+            jObject.put("token", LoginActivity.getToken());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        // Send activity
+        connection.setDoOutput(true);
+        OutputStream os = connection.getOutputStream();
+        os.write(jObject.toString().getBytes());
+        os.flush();
+        os.close();
 
         // Get response
         int responseCode = connection.getResponseCode();
+        System.out.println("PUT Response Code :  " + responseCode);
+        System.out.println("PUT Response Message : " + connection.getResponseMessage());
         if (responseCode == HttpURLConnection.HTTP_OK) {
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuffer response = new StringBuffer();
@@ -219,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             // Error message
-            Log.d("Get activities error", "GET NOT WORKED");
+            Log.d("Get activities error", "PUT NOT WORKED");
             return null;
         }
     }

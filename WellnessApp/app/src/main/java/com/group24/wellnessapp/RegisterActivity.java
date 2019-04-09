@@ -6,15 +6,12 @@ import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -118,12 +115,6 @@ public class RegisterActivity extends AppCompatActivity {
 
             // Print result
             System.out.println(response.toString());
-            JSONObject jObjResponse = null;
-            try {
-                jObjResponse = new JSONObject(response.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
             return true;
         } else {
             // Error message

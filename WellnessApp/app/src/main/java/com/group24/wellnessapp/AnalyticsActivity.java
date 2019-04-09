@@ -1,23 +1,13 @@
 package com.group24.wellnessapp;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
-
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -25,21 +15,17 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 public class AnalyticsActivity extends AppCompatActivity {
     private Context context = this;
@@ -68,6 +54,7 @@ public class AnalyticsActivity extends AppCompatActivity {
                         chart = (BarChart)findViewById(R.id.barGraphDaily);
                         chartType = "daily";
                         chartTitle = "Your Daily Activities";
+                        chart.getAxisLeft().setAxisMaximum(8.0f);
                         break;
                     case 1:
                         chart = (BarChart)findViewById(R.id.barGraphWeekly);
@@ -179,7 +166,25 @@ public class AnalyticsActivity extends AppCompatActivity {
         URL urlForGetRequest = new URL("http://3.92.227.189:80/api/" + type + "Stat/" + userID + "/" + currentDate);
         String readLine = null;
         HttpURLConnection connection = (HttpURLConnection) urlForGetRequest.openConnection();
-        connection.setRequestMethod("GET");
+        connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        JSONObject jObject = new JSONObject();
+        try {
+            jObject.put("token", LoginActivity.getToken());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        // Send activity
+        connection.setDoOutput(true);
+        OutputStream os = connection.getOutputStream();
+        os.write(jObject.toString().getBytes());
+        os.flush();
+        os.close();
 
         // Get response
         int responseCode = connection.getResponseCode();
