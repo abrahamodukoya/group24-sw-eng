@@ -13,7 +13,7 @@ const checkAuth = require('./check-auth');
 // NOT PROTECTED
 // returns a list of all of the users
 // http://3.92.227.189:80/api/users
-router.get('/users',(req, res, next) => {
+router.get('/users', checkAuth, (req, res, next) => {
     User.find()
     .select('-__v')
     .exec()
@@ -175,12 +175,10 @@ router.post('/users/login', (req, res, next) => {
 
 
 
-
-
 // patch request - PROTECTED
 // updates the activity array of a user on a specific day, based on date from request
 //http://3.92.227.189:80/api/users/_id
-router.post('/users/:id', checkAuth, (req, res, next)=> {
+router.put('/users/:id', checkAuth, (req, res, next)=> {
     const id = req.params.id;
     User.findOne({_id : id}, (err,user)=>{
         if(err){
@@ -265,7 +263,7 @@ router.post('/users/:id', checkAuth, (req, res, next)=> {
 
 // simple sign in/ verify user - checks for user with matching, username, password and ID and returns
 // the id. (no encryption, secure route etc.)
-router.get('/simpleSign/:id/:username/:password', function(req, res,next){
+router.get('/simpleSign/:id/:username/:password', checkAuth, function(req, res,next){
     const userId = req.params.id;
     const userName = req.params.username;
     const passWord = req.params.password;
@@ -289,7 +287,7 @@ router.get('/simpleSign/:id/:username/:password', function(req, res,next){
 });
 
 // get all days
-router.get('/activity/:id/', function(req, res){
+router.get('/activity/:id/', checkAuth, function(req, res){
     const userId = req.params.id;
     console.log(userId)
 
@@ -307,7 +305,7 @@ router.get('/activity/:id/', function(req, res){
 
 
 // gives all activities for a given date
-router.get('/getDate/:id/:dateReq/', async function(req, res){
+router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     
@@ -328,7 +326,7 @@ router.get('/getDate/:id/:dateReq/', async function(req, res){
 
 
 // get daily stat
-router.get('/dailyStat/:id/:dateReq', async function(req, res){
+router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -336,66 +334,8 @@ router.get('/dailyStat/:id/:dateReq', async function(req, res){
 });
 
 
-
-// Get tips 
-router.get('/tips/:id/:dateReq', async function(req, res){
-    const userId = req.params.id;
-    const dateReq = req.params.dateReq;
-    const userObj = await getFullUser(userId);
-    var date = new Date(dateReq);
-    console.log("date"+date)
-
-    var tipArray = [];
-
-// 1. This section genrates tips based on how you're doing so far today
-
-    //Get stats for today
-    var today = getDaily(userObj, date);
-
-    // If you have 5 hours of activity or more and rest is not 1/5 of your total activities (exclude sleep) !Tip
-    if(today.prodCount + today.fitnessCount + today.socialCount >=5 &&  today.restCount<(today.prodCount + today.fitnessCount + today.socialCount)/5){
-        tipArray.push("You haven't gotten enough rest today, take a break!");
-    }
-
-// 2. This section generates tips based on how you did yesterday, but doesn't tell you to do something you're already doing.
-
-    // Get string for yesterday date (inconvenient)
-     var dayIndex = ("0" + date.getDate()).slice(-2);
-     dayIndex = dayIndex - 1;
-     var monthIndex = date.getMonth()+1;
-     monthIndex = ("0"+ monthIndex).slice(-2);
-     var yearIndex = date.getFullYear();
-     var yesterdayDate = (yearIndex+'/'+monthIndex+'/'+dayIndex); 
-
-    // Get stats for yesterday.
-     var yesterday=getDaily(userObj, yesterdayDate);
-
-    // If you got less than 8 hours sleep !Tip
-    if(yesterday.sleepCount< 8){
-        tipArray.push("You got less than 8 hours sleep yesterday. Try and get more tonight");
-    }
-
-    // If your rest accounted for les than 1/4 of your activities !Tip
-    if(yesterday.restCount < yesterday.prodCount + yesterday.fitnessCount + yesterday.socialCount){
-        tipArray.push("You didn't get enough resterday. Make sure you take breaks.");
-        
-    }
-    // If your productivity less than 4 yesterday and is less than 4 today. 
-    if(yesterday.prodCount< 4 && today.prodCount < 4){
-       tipArray.push("You weren't very productive yesterday and haven't done much today. Try and do some work.");
-    }
-
-    // If you didn't do any fitness yesterday and didn't do any today.
-    if(yesterday.fitnessCount == 0 && today.fitnessCount == 0){
-        tipArray.push("You didn't do any fitness today and you didn't yesterday either. Try to stay active.")
-    }
-
-    res.send(tipArray);
-});
-
-
 // get weekly stat
-router.get('/weeklyStat/:id/:dateReq', async function(req, res){
+router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -403,7 +343,6 @@ router.get('/weeklyStat/:id/:dateReq', async function(req, res){
     var date = new Date(dateReq);
     var dateWeekAgo = new Date(dateReq);
     dateWeekAgo.setDate(date.getDate() - 7);
-
     var weeklyStat = new statObj(0,0,0,0,0);
 
     // console.log('Date :  ' + date)
@@ -438,7 +377,7 @@ router.get('/weeklyStat/:id/:dateReq', async function(req, res){
 });
 
 // get monthly stat
-router.get('/monthlyStat/:id/:dateReq', async function(req, res){
+router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -528,9 +467,6 @@ function getDaily(userObj, dateReq){
     return daily;
 }
 
-
-
-
 // stat object that gets sent back to frontend
 var statObj = function(prodCount, socialCount, restCount, sleepCount, fitCount) {
     this.prodCount = prodCount;
@@ -564,7 +500,7 @@ async function getFullUser(userId) {
 
 // delete request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
-router.delete('/users/:id', checkAuth, (req, res, next) => {
+router.delete('/users/:id', (req, res, next) => {
     const id = req.params.id;
     User.deleteOne({_id: id})
     .exec()

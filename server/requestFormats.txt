@@ -11,7 +11,7 @@ http://3.92.227.189:80/api/users/register
 
 (returns id and token and message 'Authentication successful / failed.')
 POST - LOGIN
-http://3.92.227.189:80/api/users/login
+http://3.92.227.189:80/api/users/signup
 {
 	"username": "Jeff",
 	"password": "jeffsPassword"
