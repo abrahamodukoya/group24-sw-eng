@@ -36,6 +36,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         protected Void doInBackground (String...userID) {
             BarChart chart = null;
 
+            // Counts for different user measures
             int prodCount = -1;
             int socialCount = -1;
             int restCount = -1;
@@ -48,7 +49,9 @@ public class AnalyticsActivity extends AppCompatActivity {
             String chartType = "";
             String chartTitle = "";
 
+            // Create each graph
             for (int i = 0; i < 3; i++) {
+                // Set different variables based on current graph being displayed
                 switch(i) {
                     case 0:
                         chart = (BarChart)findViewById(R.id.barGraphDaily);
@@ -68,12 +71,14 @@ public class AnalyticsActivity extends AppCompatActivity {
                         break;
                 }
 
+                // Get data for current graph
                 try {
                     jObj = getGraphData(LoginActivity.getUserID(), chartType);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
+                // Set data for current graph
                 try {
                     prodCount = Integer.parseInt(jObj.getString("prodCount"));
                     socialCount = Integer.parseInt(jObj.getString("socialCount"));
@@ -83,6 +88,8 @@ public class AnalyticsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                // Add data to graph
                 entries = new ArrayList<>();
                 entries.add(new BarEntry(0, prodCount));
                 entries.add(new BarEntry(1, socialCount));
@@ -91,6 +98,7 @@ public class AnalyticsActivity extends AppCompatActivity {
                 entries.add(new BarEntry(4, fitCount));
                 set = new BarDataSet(entries, chartTitle);
 
+                // Customise graph
                 chart.setDrawBarShadow(false);
                 chart.setDrawValueAboveBar(true);
                 chart.setPinchZoom(false);
@@ -102,9 +110,9 @@ public class AnalyticsActivity extends AppCompatActivity {
                 data.setBarWidth(0.9f);
                 chart.setData(data);
 
-                String[] months = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
+                String[] types = new String[]{"Productivity", "Social", "Rest", "Sleep", "Fitness"};
                 XAxis xAxis = chart.getXAxis();
-                xAxis.setValueFormatter(new MyXAxisValueFormatter(months));
+                xAxis.setValueFormatter(new MyXAxisValueFormatter(types));
 
                 xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
                 xAxis.setGranularity(1);
@@ -128,8 +136,6 @@ public class AnalyticsActivity extends AppCompatActivity {
                 ActionBar actionBar = getSupportActionBar();
                 actionBar.setDisplayHomeAsUpEnabled(false);
             }
-
-            Log.d("jObj", jObj.toString());
         }
     }
 
@@ -156,6 +162,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         }
     }
 
+    // Getting data for graphs based on user and type of graph (daily, weekly, monthly)
     public static JSONObject getGraphData(String userID, String type) throws IOException {
         // Get current date
         Calendar calendar = Calendar.getInstance();
@@ -169,6 +176,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json");
 
+        // Create object to store user token to validate user
         JSONObject jObject = new JSONObject();
         try {
             jObject.put("token", LoginActivity.getToken());
@@ -179,7 +187,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        // Send activity
+        // Send token for validation
         connection.setDoOutput(true);
         OutputStream os = connection.getOutputStream();
         os.write(jObject.toString().getBytes());
@@ -190,14 +198,15 @@ public class AnalyticsActivity extends AppCompatActivity {
         int responseCode = connection.getResponseCode();
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
+            // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuffer response = new StringBuffer();
             while ((readLine = in.readLine()) != null) {
                 response.append(readLine);
             } in.close();
 
+            // Receive data
             JSONObject jObj = null;
-
             try {
                  jObj = new JSONObject(response.toString());
             } catch (JSONException e) {
@@ -206,7 +215,7 @@ public class AnalyticsActivity extends AppCompatActivity {
             return jObj;
         } else {
             // Error message
-            Log.d("Graph get error", "GET NOT WORKED");
+            System.out.println("GRAPH NOT WORKED");
             return null;
         }
     }

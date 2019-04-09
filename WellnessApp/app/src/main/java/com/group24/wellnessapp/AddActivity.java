@@ -55,10 +55,13 @@ public class AddActivity extends AppCompatActivity {
 
                         // Send data to server and go to MainActivity if input valid
                         if (Integer.parseInt(activityTimeText.getText().toString()) > 24 || Integer.parseInt(activityTimeText.getText().toString()) < 1) {
+                            // Display error message for invalid duration
                             durationErrorTextView.setVisibility(View.VISIBLE);
                         } else {
+                            // Hide error message for invalid duration
                             durationErrorTextView.setVisibility(View.GONE);
                             try {
+                                // Send data
                                 sendActivity(LoginActivity.getUserID(), activityCategorySpinner.getSelectedItem().toString().toLowerCase(), activityLabelText.getText().toString().toLowerCase(), Integer.parseInt(activityTimeText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -67,6 +70,7 @@ public class AddActivity extends AppCompatActivity {
                             // Clear activity stack for this activity
                             sendActivityData.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+                            // Go to Main Activity
                             startActivity(sendActivityData);
                         }
                     }
@@ -94,6 +98,7 @@ public class AddActivity extends AppCompatActivity {
         new addAsyncTask().execute(LoginActivity.getUserID());
     }
 
+    // Add activity to database based on user and activity parameters
     public static void sendActivity(String userID, String type, String label, int duration) throws IOException {
         // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/" + userID);
@@ -130,6 +135,7 @@ public class AddActivity extends AppCompatActivity {
         System.out.println("PUT Response Code :  " + responseCode);
         System.out.println("PUT Response Message : " + putConnection.getResponseMessage());
         if (responseCode == HttpURLConnection.HTTP_CREATED) {
+            // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(putConnection.getInputStream()));
             String inputLine;
             StringBuffer response = new StringBuffer();
@@ -137,11 +143,9 @@ public class AddActivity extends AppCompatActivity {
             while ((inputLine = in .readLine()) != null) {
                 response.append(inputLine);
             } in .close();
-
-            System.out.println(response.toString());
         } else {
             // Error message
-            System.out.println("PUT NOT WORKED");
+            System.out.println("ADD ACTIVITY NOT WORKED");
         }
     }
 }

@@ -34,6 +34,7 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     TextView registerErrorTextView = findViewById(R.id.registerErrorTextView);
                     try {
+                        // If valid username and password
                         if (registerUser(usernameEditText.getText().toString(), passwordEditText.getText().toString()) == true) {
                             // Success
                             // Send user credentials to Login screen
@@ -72,6 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
         new registerAsyncTask().execute("text");
     }
 
+    // Register user with inputted username and password
     public static boolean registerUser(String username, String password) throws IOException {
         // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/register");
@@ -79,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
         postConnection.setRequestMethod("POST");
         postConnection.setRequestProperty("Content-Type", "application/json");
 
-        // Create JSon object with user credentials
+        // Create JSON object with user credentials
         JSONObject jObj = new JSONObject();
         try {
             jObj.put("username", username);
@@ -92,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        // Send data
+        // Send new user credentials
         postConnection.setDoOutput(true);
         OutputStream os = postConnection.getOutputStream();
         os.write(jObj.toString().getBytes());
@@ -113,12 +115,10 @@ public class RegisterActivity extends AppCompatActivity {
                 response.append(inputLine);
             } in .close();
 
-            // Print result
-            System.out.println(response.toString());
             return true;
         } else {
             // Error message
-            System.out.println("POST NOT WORKED");
+            System.out.println("REGISTER NOT WORKED");
             return false;
         }
     }

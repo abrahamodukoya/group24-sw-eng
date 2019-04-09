@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Add activities to log screen
                 for (int i = jArr.length()-1; i >= 0; i--) {
+                    // Create new layout for activities and set parameters
                     LinearLayout parentLinearLayout = findViewById(R.id.parentLinearLayout);
 
                     LinearLayout newLayout = new LinearLayout(context);
@@ -180,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
         new logAsyncTask().execute(LoginActivity.getUserID());
     }
 
+    // Get activities based on user and current date
     public static JSONArray getActivities(String userID) throws IOException {
         // Get current date
         Calendar calendar = Calendar.getInstance();
@@ -193,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json");
 
+        // Create JSON object with token for user validation
         JSONObject jObject = new JSONObject();
         try {
             jObject.put("token", LoginActivity.getToken());
@@ -203,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        // Send activity
+        // Send token for validation
         connection.setDoOutput(true);
         OutputStream os = connection.getOutputStream();
         os.write(jObject.toString().getBytes());
@@ -215,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("PUT Response Code :  " + responseCode);
         System.out.println("PUT Response Message : " + connection.getResponseMessage());
         if (responseCode == HttpURLConnection.HTTP_OK) {
+            // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuffer response = new StringBuffer();
             while ((readLine = in.readLine()) != null) {
@@ -229,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // Success
                 try {
+                    // Store activities
                     jArr = new JSONArray(response.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -237,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             // Error message
-            Log.d("Get activities error", "PUT NOT WORKED");
+            System.out.println("GET ACTIVITIES NOT WORKED");
             return null;
         }
     }

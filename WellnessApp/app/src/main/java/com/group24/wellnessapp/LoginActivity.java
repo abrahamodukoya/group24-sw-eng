@@ -26,6 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     // AsyncTask for JSON requests
     class loginAsyncTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground (String...userID) {
+            // Username and password fields
             final EditText usernameEditText = findViewById(R.id.usernameEditText);
             final EditText passwordEditText = findViewById(R.id.passwordEditText);
 
@@ -43,15 +44,19 @@ public class LoginActivity extends AppCompatActivity {
                     // Test login credentials
                     try {
                         if (userLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString()) != null) {
+                            // Hide error
                             loginErrorTextView.setVisibility(View.GONE);
+                            // Set userID
                             try {
                                 setUserID(userLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                            // Go to Main Activity
                             Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(startIntent);
                         } else {
+                            // Display error
                             loginErrorTextView.setVisibility(View.VISIBLE);
                         }
                     } catch (IOException e) {
@@ -103,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
         new loginAsyncTask().execute("text");
     }
 
+    // Login user based on inputted username and password
     public static String userLogin(String username, String password) throws IOException {
         // Connect to server
         URL obj = new URL("http://3.92.227.189:80/api/users/login");
@@ -133,7 +139,8 @@ public class LoginActivity extends AppCompatActivity {
         int responseCode = postConnection.getResponseCode();
         System.out.println("POST Response Code :  " + responseCode);
         System.out.println("POST Response Message : " + postConnection.getResponseMessage());
-        if (responseCode == HttpURLConnection.HTTP_CREATED) { //success
+        if (responseCode == HttpURLConnection.HTTP_CREATED) {
+            // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     postConnection.getInputStream()));
             String inputLine;
@@ -142,8 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                 response.append(inputLine);
             } in .close();
 
-            // Print result
-            System.out.println(response.toString());
+            // Set token and ID
             JSONObject jObjResponse = null;
             try {
                 jObjResponse = new JSONObject(response.toString());
@@ -155,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         } else {
             // Error message
-            System.out.println("POST NOT WORKED");
+            System.out.println("LOGIN NOT WORKED");
             return null;
         }
     }
