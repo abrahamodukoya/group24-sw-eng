@@ -13,7 +13,7 @@ const checkAuth = require('./check-auth');
 // NOT PROTECTED
 // returns a list of all of the users
 // http://3.92.227.189:80/api/users
-router.get('/users',(req, res, next) => {
+router.get('/users', checkAuth, (req, res, next) => {
     User.find()
     .select('-__v')
     .exec()
@@ -178,7 +178,7 @@ router.post('/users/login', (req, res, next) => {
 // patch request - PROTECTED
 // updates the activity array of a user on a specific day, based on date from request
 //http://3.92.227.189:80/api/users/_id
-router.post('/users/:id', checkAuth, (req, res, next)=> {
+router.put('/users/:id', checkAuth, (req, res, next)=> {
     const id = req.params.id;
     User.findOne({_id : id}, (err,user)=>{
         if(err){
@@ -263,7 +263,7 @@ router.post('/users/:id', checkAuth, (req, res, next)=> {
 
 // simple sign in/ verify user - checks for user with matching, username, password and ID and returns
 // the id. (no encryption, secure route etc.)
-router.get('/simpleSign/:id/:username/:password', function(req, res,next){
+router.get('/simpleSign/:id/:username/:password', checkAuth, function(req, res,next){
     const userId = req.params.id;
     const userName = req.params.username;
     const passWord = req.params.password;
@@ -287,7 +287,7 @@ router.get('/simpleSign/:id/:username/:password', function(req, res,next){
 });
 
 // get all days
-router.get('/activity/:id/', function(req, res){
+router.get('/activity/:id/', checkAuth, function(req, res){
     const userId = req.params.id;
     console.log(userId)
 
@@ -305,7 +305,7 @@ router.get('/activity/:id/', function(req, res){
 
 
 // gives all activities for a given date
-router.get('/getDate/:id/:dateReq/', async function(req, res){
+router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     
@@ -326,7 +326,7 @@ router.get('/getDate/:id/:dateReq/', async function(req, res){
 
 
 // get daily stat
-router.get('/dailyStat/:id/:dateReq', async function(req, res){
+router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -335,7 +335,7 @@ router.get('/dailyStat/:id/:dateReq', async function(req, res){
 
 
 // get weekly stat
-router.get('/weeklyStat/:id/:dateReq', async function(req, res){
+router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -377,7 +377,7 @@ router.get('/weeklyStat/:id/:dateReq', async function(req, res){
 });
 
 // get monthly stat
-router.get('/monthlyStat/:id/:dateReq', async function(req, res){
+router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -500,7 +500,7 @@ async function getFullUser(userId) {
 
 // delete request - PROTECTED
 //http://3.92.227.189:80/api/users/_id
-router.delete('/users/:id', checkAuth, (req, res, next) => {
+router.delete('/users/:id', (req, res, next) => {
     const id = req.params.id;
     User.deleteOne({_id: id})
     .exec()

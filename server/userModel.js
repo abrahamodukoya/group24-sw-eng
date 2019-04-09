@@ -1,3 +1,4 @@
+
 // user model for the database, a user will have a data array
 // data arary consists of an array of day objects
 // day object consits of corresponding date, and an array of activities for that day
@@ -18,7 +19,7 @@ const userSchema = mongoose.Schema({
                 _id : false,
                 type: {type: String, required : true},
                 label: String,
-                duration: {type: String, required : true}
+                duration: {type: Number, required : true}
             }]
         }],
     },
