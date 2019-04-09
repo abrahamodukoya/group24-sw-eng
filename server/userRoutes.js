@@ -325,6 +325,66 @@ router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
 });
 
 
+// Get tips 
+router.get('/tips/:id/:dateReq', async function(req, res){
+    const userId = req.params.id;
+    const dateReq = req.params.dateReq;
+    const userObj = await getFullUser(userId);
+    var date = new Date(dateReq);
+    console.log("date"+date)
+
+    var tipArray = [];
+
+// 1. This section generates tips based on how you're doing so far today
+
+    //Get stats for today
+    var today = getDaily(userObj, date);
+
+    // If you have 5 hours of activity or more and rest is not 1/5 of your total activities (exclude sleep) !Tip
+    if(today.prodCount + today.fitnessCount + today.socialCount >=5 &&  today.restCount<(today.prodCount + today.fitnessCount + today.socialCount)/5){
+        tipArray.push("You haven't gotten enough rest today, take a break!");
+    }
+
+// 2. This section generates tips based on how you did yesterday, but doesn't tell you to do something you're already doing.
+
+    // Get string for yesterday date (inconvenient)
+     var dayIndex = ("0" + date.getDate()).slice(-2);
+     dayIndex = dayIndex - 1;
+     var monthIndex = date.getMonth()+1;
+     monthIndex = ("0"+ monthIndex).slice(-2);
+     var yearIndex = date.getFullYear();
+     var yesterdayDate = (yearIndex+'/'+monthIndex+'/'+dayIndex); 
+
+    // Get stats for yesterday.
+     var yesterday=getDaily(userObj, yesterdayDate);
+
+    // If you got less than 8 hours sleep !Tip
+    if(yesterday.sleepCount< 8){
+        tipArray.push("You got less than 8 hours sleep yesterday. Try and get more tonight");
+    }
+
+    // If your rest accounted for les than 1/4 of your activities !Tip
+    if(yesterday.restCount < yesterday.prodCount + yesterday.fitnessCount + yesterday.socialCount){
+        tipArray.push("You didn't get enough resterday. Make sure you take breaks.");
+        
+    }
+    // If your productivity less than 4 yesterday and is less than 4 today. 
+    if(yesterday.prodCount< 4 && today.prodCount < 4){
+       tipArray.push("You weren't very productive yesterday and haven't done much today. Try and do some work.");
+    }
+
+    // If you didn't do any fitness yesterday and didn't do any today.
+    if(yesterday.fitnessCount == 0 && today.fitnessCount == 0){
+        tipArray.push("You didn't do any fitness today and you didn't yesterday either. Try to stay active.")
+    }
+
+    else if(tipArray.length == 0){
+        tipArray.push("You're doing fine for now. Keep using the app to get more tips.")
+    }
+
+    res.send(tipArray);
+});
+
 // get daily stat
 router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
@@ -416,6 +476,8 @@ router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
         i--;
     }
     console.log(monthlyStat);
+
+
     res.send(monthlyStat);
 });
 
