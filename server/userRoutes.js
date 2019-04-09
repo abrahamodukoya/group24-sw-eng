@@ -180,7 +180,7 @@ router.post('/users/login', (req, res, next) => {
 // patch request - PROTECTED
 // updates the activity array of a user on a specific day, based on date from request
 //http://3.92.227.189:80/api/users/_id
-router.patch('/users/:id', checkAuth, (req, res, next)=> {
+router.post('/users/:id', checkAuth, (req, res, next)=> {
     const id = req.params.id;
     User.findOne({_id : id}, (err,user)=>{
         if(err){
