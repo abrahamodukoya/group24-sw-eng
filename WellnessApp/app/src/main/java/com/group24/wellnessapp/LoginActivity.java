@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Start AsyncTask
-        new loginAsyncTask().execute("text");
+        new loginAsyncTask().execute(LoginActivity.getUserID());
     }
 
     // Login user based on inputted username and password

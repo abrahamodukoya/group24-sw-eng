@@ -70,7 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         // Start AsyncTask
-        new registerAsyncTask().execute("text");
+        new registerAsyncTask().execute("");
     }
 
     // Register user with inputted username and password

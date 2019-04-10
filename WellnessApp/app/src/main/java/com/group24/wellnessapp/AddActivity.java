@@ -132,8 +132,8 @@ public class AddActivity extends AppCompatActivity {
 
         // Get and print response
         int responseCode = putConnection.getResponseCode();
-        System.out.println("PUT Response Code :  " + responseCode);
-        System.out.println("PUT Response Message : " + putConnection.getResponseMessage());
+        System.out.println("ADD Response Code :  " + responseCode);
+        System.out.println("ADD Response Message : " + putConnection.getResponseMessage());
         if (responseCode == HttpURLConnection.HTTP_CREATED) {
             // Success
             BufferedReader in = new BufferedReader(new InputStreamReader(putConnection.getInputStream()));

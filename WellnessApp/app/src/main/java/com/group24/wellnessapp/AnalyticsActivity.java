@@ -6,7 +6,6 @@ import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
@@ -145,7 +144,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_analytics);
 
         // Start AsyncTask
-        new analyticsAsyncTask().execute("text");
+        new analyticsAsyncTask().execute(LoginActivity.getUserID());
     }
 
     // Format method for x-axis of graphs
