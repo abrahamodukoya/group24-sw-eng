@@ -10,7 +10,7 @@ const checkAuth = require('./check-auth');
 
 
 
-// NOT PROTECTED
+// PROTECTED
 // returns a list of all of the users
 // http://3.92.227.189:80/api/users
 router.get('/users', checkAuth, (req, res, next) => {
@@ -175,7 +175,7 @@ router.post('/users/login', (req, res, next) => {
 
 
 
-// patch request - PROTECTED
+// PROTECTED
 // updates the activity array of a user on a specific day, based on date from request
 //http://3.92.227.189:80/api/users/_id
 router.put('/users/:id', checkAuth, (req, res, next)=> {
@@ -261,31 +261,8 @@ router.put('/users/:id', checkAuth, (req, res, next)=> {
     });
 });
 
-// Simple sign in/ verify user - checks for user with matching, username, password and ID and returns
-// the id. (no encryption, secure route etc.). This is now obsolete.
-router.get('/simpleSign/:id/:username/:password', checkAuth, function(req, res,next){
-    const userId = req.params.id;
-    const userName = req.params.username;
-    const passWord = req.params.password;
 
-    console.log(userId);
-    console.log(userName);
-    console.log(passWord);
-
-  User.find({_id: userId, password: passWord, username: userName }, '_id', function(err, user)
-  {
-      if (err)
-      {
-        res.status(404).json({
-                message: ' No valid entry for this id.'
-            });
-      }
-    res.json(user);
-    console.log(user)
-
- });
-});
-
+// PROTECTED
 // Get all days
 router.get('/activity/:id/', checkAuth, function(req, res){
     const userId = req.params.id;
@@ -304,6 +281,7 @@ router.get('/activity/:id/', checkAuth, function(req, res){
   });
 
 
+// PROTECTED
 // Gives all activities for a given date
 router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
     const userId = req.params.id;
@@ -324,7 +302,7 @@ router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
     res.json("None found");
 });
 
-
+// PROTECTED
 // Get tips - These tips are mostly to display functionality, I'm no expert on healthy student lifestyle.
 router.put('/tips/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
@@ -395,6 +373,7 @@ router.put('/tips/:id/:dateReq', checkAuth, async function(req, res){
     res.send(tipArray);
 });
 
+// PROTECTED
 // Get daily stat
 router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
@@ -403,7 +382,7 @@ router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
    res.send(getDaily(userObj,dateReq));
 });
 
-
+// PROTECTED
 // Get weekly stat
 router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
@@ -446,6 +425,7 @@ function getWeekly(userObj, dateReq){
     return(weeklyStat);
 }
 
+// PROTECTED
 // Get monthly stat
 router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
