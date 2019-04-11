@@ -261,8 +261,8 @@ router.put('/users/:id', checkAuth, (req, res, next)=> {
     });
 });
 
-// simple sign in/ verify user - checks for user with matching, username, password and ID and returns
-// the id. (no encryption, secure route etc.)
+// Simple sign in/ verify user - checks for user with matching, username, password and ID and returns
+// the id. (no encryption, secure route etc.). This is now obsolete.
 router.get('/simpleSign/:id/:username/:password', checkAuth, function(req, res,next){
     const userId = req.params.id;
     const userName = req.params.username;
@@ -286,7 +286,7 @@ router.get('/simpleSign/:id/:username/:password', checkAuth, function(req, res,n
  });
 });
 
-// get all days
+// Get all days
 router.get('/activity/:id/', checkAuth, function(req, res){
     const userId = req.params.id;
     console.log(userId)
@@ -304,7 +304,7 @@ router.get('/activity/:id/', checkAuth, function(req, res){
   });
 
 
-// gives all activities for a given date
+// Gives all activities for a given date
 router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
@@ -325,8 +325,8 @@ router.put('/getDate/:id/:dateReq/', checkAuth, async function(req, res){
 });
 
 
-// Get tips 
-router.get('/tips/:id/:dateReq', async function(req, res){
+// Get tips - These tips are mostly to display functionality, I'm no expert on healthy student lifestyle.
+router.put('/tips/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
@@ -339,6 +339,7 @@ router.get('/tips/:id/:dateReq', async function(req, res){
 
     //Get stats for today
     var today = getDaily(userObj, date);
+    var week = getWeekly(userObj,date);
 
     // If you have 5 hours of activity or more and rest is not 1/5 of your total activities (exclude sleep) !Tip
     if(today.prodCount + today.fitnessCount + today.socialCount >=5 &&  today.restCount<(today.prodCount + today.fitnessCount + today.socialCount)/5){
@@ -359,13 +360,13 @@ router.get('/tips/:id/:dateReq', async function(req, res){
      var yesterday=getDaily(userObj, yesterdayDate);
 
     // If you got less than 8 hours sleep !Tip
-    if(yesterday.sleepCount< 8){
+    if(yesterday.sleepCount< 8 && yesterday.sleepCount!=0){
         tipArray.push("You got less than 8 hours sleep yesterday. Try and get more tonight");
     }
 
     // If your rest accounted for les than 1/4 of your activities !Tip
     if(yesterday.restCount < yesterday.prodCount + yesterday.fitnessCount + yesterday.socialCount){
-        tipArray.push("You didn't get enough resterday. Make sure you take breaks.");
+        tipArray.push("You didn't get enough rest yesterday. Make sure you take breaks.");
         
     }
     // If your productivity less than 4 yesterday and is less than 4 today. 
@@ -378,14 +379,23 @@ router.get('/tips/:id/:dateReq', async function(req, res){
         tipArray.push("You didn't do any fitness today and you didn't yesterday either. Try to stay active.")
     }
 
+//3. This section generates tips based on how you've been doing over last 7 days, doesn't tell you things you're already doing.
+    if(week.restCount < week.prodCount + week.fitnessCount + week.socialCount){
+        tipArray.push("You haven't been getting enough rest over the past week. Try to chill and take breaks!")
+    }
+
+    // If you haven't been spending 3 times more time in productivity than social. 
+    if(week.prodCount/3 < week.socialCount && prodCount < 20){
+        tipArray.push("You haven't spent enough time productively over the last week. Try to cut into your social time and use it to do work!")
+    }
+
     else if(tipArray.length == 0){
         tipArray.push("You're doing fine for now. Keep using the app to get more tips.")
     }
-
     res.send(tipArray);
 });
 
-// get daily stat
+// Get daily stat
 router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
@@ -394,22 +404,24 @@ router.put('/dailyStat/:id/:dateReq', checkAuth, async function(req, res){
 });
 
 
-// get weekly stat
+// Get weekly stat
 router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
     const userObj = await getFullUser(userId);
+    res.send(getWeekly(userObj,dateReq));
+});
 
+
+function getWeekly(userObj, dateReq){
     var date = new Date(dateReq);
     var dateWeekAgo = new Date(dateReq);
     dateWeekAgo.setDate(date.getDate() - 7);
     var weeklyStat = new statObj(0,0,0,0,0);
 
-    // console.log('Date :  ' + date)
-    // console.log('Date one week ago:  '+dateWeekAgo)
-
-    // we will never have to check more days than this if
-    // the current date is entered.
+    // We will never have to check more days than this counting down if
+    // the current date is entered. This limit should be removed 
+    // if you want to get stats for the last 7 days from any given date.
     var limit = userObj.data.day.length - 7;
 
     var lowerFound = false;
@@ -419,8 +431,6 @@ router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
         var dateCheck = new Date(userObj.data.day[i].date);
        if(dateCheck<=date && dateWeekAgo <= dateCheck){
             var temp = getDaily(userObj, userObj.data.day[i].date);
-            // console.log('Adding this day  '+ dateCheck)
-            // console.log('This is one week ago  '+ dateWeekAgo)
             weeklyStat.fitCount = weeklyStat.fitCount + temp.fitCount;
             weeklyStat.socialCount = weeklyStat.socialCount + temp.socialCount;
             weeklyStat.restCount = weeklyStat.restCount + temp.restCount;
@@ -433,10 +443,10 @@ router.put('/weeklyStat/:id/:dateReq', checkAuth, async function(req, res){
         i--;
     }
     console.log(weeklyStat);
-    res.send(weeklyStat);
-});
+    return(weeklyStat);
+}
 
-// get monthly stat
+// Get monthly stat
 router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
     const userId = req.params.id;
     const dateReq = req.params.dateReq;
@@ -447,12 +457,7 @@ router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
     dateMonthAgo.setDate(date.getDate() - 31);
     var monthlyStat = new statObj(0,0,0,0,0);
 
-    // console.log('Date :  ' + date)
-    // console.log('Date one week ago:  '+dateMonthAgo)
-
-    // we will never have to check more days than this if
-    // the current date is entered.
-
+    // If not getting stats for current date (i.e latest day in array), remove limit.
     var limit = userObj.data.day.length - 31;
 
     var lowerFound = false;
@@ -462,13 +467,13 @@ router.put('/monthlyStat/:id/:dateReq', checkAuth, async function(req, res){
         var dateCheck = new Date(userObj.data.day[i].date);
        if(dateCheck<=date && dateMonthAgo <= dateCheck){
             var temp = getDaily(userObj, userObj.data.day[i].date);
-            // console.log('Adding this day  '+ dateCheck)
-            // console.log('This is one month ago  '+ dateMonthAgo)
+            if(temp!= null){
             monthlyStat.fitCount = monthlyStat.fitCount + temp.fitCount;
             monthlyStat.socialCount = monthlyStat.socialCount + temp.socialCount;
             monthlyStat.restCount = monthlyStat.restCount + temp.restCount;
             monthlyStat.sleepCount = monthlyStat.sleepCount + temp.sleepCount;
             monthlyStat.prodCount = monthlyStat.prodCount + temp.prodCount;
+            }
         }
         else{
             lowerFound = true;
@@ -496,34 +501,36 @@ function getDaily(userObj, dateReq){
         }
     }
 
-    while(j<userObj.data.day[i].activity.length){
-        if(userObj.data.day[i].activity[j].type=='productivity'){
-            var productivityString =userObj.data.day[i].activity[j].duration;
-            var prod = parseInt(productivityString, 10);
-            productivityCount = productivityCount + prod;
-        }
-        else if(userObj.data.day[i].activity[j].type=='social'){
-            var socialString =userObj.data.day[i].activity[j].duration;
-            var social = parseInt(socialString, 10);
-            socialCount = socialCount + social;
-        }
-        else if(userObj.data.day[i].activity[j].type=='rest'){
-            var restString =userObj.data.day[i].activity[j].duration;
-            var rest = parseInt(restString, 10);
-            restCount = restCount + rest;
-        }
-        else if(userObj.data.day[i].activity[j].type=='fitness'){
-            var fitnessString = userObj.data.day[i].activity[j].duration;
-            var fitness = parseInt(fitnessString, 10);
-            fitCount = fitCount + fitness;
-        }
-        else if(userObj.data.day[i].activity[j].type=='sleep'){
-            var sleepString =userObj.data.day[i].activity[j].duration;
-            var sleep = parseInt(sleepString, 10);
-            sleepCount = sleepCount + sleep;
-        }
-        j++;
-    } 
+    if(found == true) {
+        while(j<userObj.data.day[i].activity.length){
+            if(userObj.data.day[i].activity[j].type=='productivity'){
+                var productivityString =userObj.data.day[i].activity[j].duration;
+                var prod = parseInt(productivityString, 10);
+                productivityCount = productivityCount + prod;
+            }
+            else if(userObj.data.day[i].activity[j].type=='social'){
+                var socialString =userObj.data.day[i].activity[j].duration;
+                var social = parseInt(socialString, 10);
+                socialCount = socialCount + social;
+            }
+            else if(userObj.data.day[i].activity[j].type=='rest'){
+                var restString =userObj.data.day[i].activity[j].duration;
+                var rest = parseInt(restString, 10);
+                restCount = restCount + rest;
+            }
+            else if(userObj.data.day[i].activity[j].type=='fitness'){
+                var fitnessString = userObj.data.day[i].activity[j].duration;
+                var fitness = parseInt(fitnessString, 10);
+                fitCount = fitCount + fitness;
+            }
+            else if(userObj.data.day[i].activity[j].type=='sleep'){
+                var sleepString =userObj.data.day[i].activity[j].duration;
+                var sleep = parseInt(sleepString, 10);
+                sleepCount = sleepCount + sleep;
+            }
+            j++;
+        } 
+}
     var daily = new statObj(productivityCount, socialCount, restCount, sleepCount, fitCount);
     console.log(daily)
     return daily;
